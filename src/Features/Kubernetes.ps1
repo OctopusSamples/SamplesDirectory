@@ -80,13 +80,13 @@ function Find-KubernetesFeatureInStep {
         return $items;
     }
     # Check step for any step template containing the name 'Kubernetes'
-    if (Test-StepTemplateNameContainsValue -step $step -name "Kubernetes" - octopusData $octopusData) {
+    if (Test-StepTemplateNameContainsValue -step $step -name "Kubernetes" -octopusData $octopusData) {
         Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has a step template. with the word Kubernetes in it." 
         $items += $itemToCatalog
         return $items;
     }
     # Check step for any step template containing the name 'Helm'
-    if (Test-StepTemplateNameContainsValue -step $step -name "Helm" - octopusData $octopusData) {
+    if (Test-StepTemplateNameContainsValue -step $step -name "Helm" -octopusData $octopusData) {
         Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has a step template. with the word Helm in it." 
         $items += $itemToCatalog
         return $items;

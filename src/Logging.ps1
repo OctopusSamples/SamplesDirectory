@@ -60,4 +60,4 @@ function Write-OctopusLog {
     Add-Content -Value $message -Path $logPath
 }
 
-Write-OctopusSuccess "Using version $catalogVersion of the catalog processor."
+Write-Host "Using version $catalogVersion of the catalog processor."
