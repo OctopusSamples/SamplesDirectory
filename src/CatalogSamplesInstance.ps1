@@ -27,8 +27,6 @@ $OctopusUrl = $OctopusUrl.TrimEnd("/")
 
 $SpaceList = Get-OctopusSpaceList -octopusUrl $OctopusUrl -octopusApiKey $OctopusApiKey
 
-$SpaceList = $SpaceList
-
 foreach ($space in $SpaceList) {
     Write-OctopusSuccess "`nStarting catalog of space '$($space.Name)'`n"
     
