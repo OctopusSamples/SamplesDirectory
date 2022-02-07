@@ -2,7 +2,9 @@ param (
     [Parameter(Mandatory = $false)]
     $OctopusUrl = "https://your.octopus.app",
     [Parameter(Mandatory = $false)]
-    $OctopusApiKey = "API-YOURKEY"
+    $OctopusApiKey = "API-YOURKEY",
+    [Parameter(Mandatory = $false)]
+    $OutputResults = $False
 )
 
 # Include helpers
@@ -65,9 +67,11 @@ $catalogEndDateTime = Get-Date
 $catalogElapsedTime = New-TimeSpan $catalogStartDateTime $catalogEndDateTime
 
 Write-OctopusSuccess "It took $($catalogElapsedTime.ToString("hh\:mm\:ss\.ff")) for the catalog process to finish."
-Write-OctopusSuccess "Found $($items.Length) items.`n"
+Write-OctopusSuccess "Found $($items.Length) item(s).`n"
 
 # Sort items
 $items = $items | Sort-Object -Property ProjectId
-# Return items
-$items
+
+If ($OutputResults -eq $True) {
+    $items | Format-List    
+}
