@@ -65,11 +65,13 @@ $catalogEndDateTime = Get-Date
 $catalogElapsedTime = New-TimeSpan $catalogStartDateTime $catalogEndDateTime
 
 Write-Host "It took $($catalogElapsedTime.ToString("hh\:mm\:ss\.ff")) for the catalog process to finish." -ForegroundColor Black
-Write-OctopusSuccess "Found $($items.Length) item(s).`n"
+Write-Host "Found $($items.Length) item(s).`n" -ForegroundColor Black
 
 # Sort items
 $items = $items | Sort-Object -Property ProjectId
 
 If ($OutputResults -eq $True) {
-    $items | Format-List    
+    $items | Format-List  
+} else {
+    return $items
 }
