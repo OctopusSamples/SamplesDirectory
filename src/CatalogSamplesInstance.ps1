@@ -64,8 +64,8 @@ foreach ($space in $SpaceList) {
 $catalogEndDateTime = Get-Date
 $catalogElapsedTime = New-TimeSpan $catalogStartDateTime $catalogEndDateTime
 
-Write-Host "It took $($catalogElapsedTime.ToString("hh\:mm\:ss\.ff")) for the catalog process to finish." -ForegroundColor Black
-Write-Host "Found $($items.Length) item(s).`n" -ForegroundColor Black
+Write-Host "It took $($catalogElapsedTime.ToString("hh\:mm\:ss\.ff")) for the catalog process to finish." 
+Write-Host "Found $($items.Length) item(s).`n" 
 
 # Sort items
 $items = $items | Sort-Object -Property ProjectId

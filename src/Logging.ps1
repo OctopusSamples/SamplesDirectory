@@ -8,6 +8,8 @@ $logArchiveFolder = "$PSScriptRoot/logs/archive__$currentDateFormatted"
 $logPath = [System.IO.Path]::Combine($logFolder, "log.txt")
 $archiveLogs = $False
 
+$RunningWithinOctopus = ($null -ne $OctopusParameters)
+
 if (Test-Path $logPath) {
 
     if ($archiveLogs -eq $True) {
@@ -36,21 +38,42 @@ function Write-OctopusVerbose {
 function Write-OctopusSuccess {
     param($message)
 
-    Write-Host $message -ForegroundColor Green
+    $params = @{
+        Object = $message;
+    }
+    if($RunningWithinOctopus -eq $False) {
+        $params.ForegroundColor = "Green";
+    }
+
+    Write-Host @params
     Write-OctopusLog $message    
 }
 
 function Write-OctopusWarning {
     param($message)
 
-    Write-Host "Warning $message" -ForegroundColor Yellow    
+    $params = @{
+        Object = "Warning: $message";
+    }
+    if($RunningWithinOctopus -eq $False) {
+        $params.ForegroundColor = "Yellow";
+    }
+
+    Write-Host @params
     Write-OctopusLog $message
 }
 
 function Write-OctopusCritical {
     param ($message)
 
-    Write-Host "Critical Message: $message" -ForegroundColor Red
+    $params = @{
+        Object = "Critical Message: $message";
+    }
+    if($RunningWithinOctopus -eq $False) {
+        $params.ForegroundColor = "Red";
+    }
+
+    Write-Host @params
     Write-OctopusLog $message
 }
 
