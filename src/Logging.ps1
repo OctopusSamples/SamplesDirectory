@@ -9,6 +9,7 @@ $logPath = [System.IO.Path]::Combine($logFolder, "log.txt")
 $archiveLogs = $False
 
 $RunningWithinOctopus = ($null -ne $OctopusParameters)
+Write-Host "RunningWithinOctopus: $RunningWithinOctopus"
 
 if (Test-Path $logPath) {
 
