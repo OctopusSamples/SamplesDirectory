@@ -9,7 +9,7 @@ $logPath = [System.IO.Path]::Combine($logFolder, "log.txt")
 $archiveLogs = $False
 
 $RunningWithinOctopus = ($null -ne $OctopusParameters)
-if ($RunningWithinOctopus -eq $True -and $null -ne $PSStyle) {
+if ($RunningWithinOctopus -eq $True -and $PSEdition -eq "Core") {
     $PSStyle.OutputRendering = "PlainText"
 }
 
