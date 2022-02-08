@@ -9,7 +9,9 @@ $logPath = [System.IO.Path]::Combine($logFolder, "log.txt")
 $archiveLogs = $False
 
 $RunningWithinOctopus = ($null -ne $OctopusParameters)
-Write-Host "RunningWithinOctopus: $RunningWithinOctopus"
+if ($RunningWithinOctopus -eq $True -and $null -ne $PSStyle) {
+    $PSStyle.OutputRendering = "PlainText"
+}
 
 if (Test-Path $logPath) {
 
@@ -39,42 +41,21 @@ function Write-OctopusVerbose {
 function Write-OctopusSuccess {
     param($message)
 
-    $params = @{
-        Object = $message;
-    }
-    if($RunningWithinOctopus -eq $False) {
-        $params.ForegroundColor = "Green";
-    }
-
-    Write-Host @params
+    Write-Host $message -ForegroundColor Green
     Write-OctopusLog $message    
 }
 
 function Write-OctopusWarning {
     param($message)
 
-    $params = @{
-        Object = "Warning: $message";
-    }
-    if($RunningWithinOctopus -eq $False) {
-        $params.ForegroundColor = "Yellow";
-    }
-
-    Write-Host @params
+    Write-Host "Warning $message" -ForegroundColor Yellow    
     Write-OctopusLog $message
 }
 
 function Write-OctopusCritical {
     param ($message)
 
-    $params = @{
-        Object = "Critical Message: $message";
-    }
-    if($RunningWithinOctopus -eq $False) {
-        $params.ForegroundColor = "Red";
-    }
-
-    Write-Host @params
+    Write-Host "Critical Message: $message" -ForegroundColor Red
     Write-OctopusLog $message
 }
 
