@@ -3,9 +3,10 @@ param (
     [string]$MarkDownFilePath
 )
 
+$ErrorActionPreference = "Stop"
+
 $CatalogItemsContent = Get-Content $CatalogItemsFilePath | ConvertFrom-Json
 $FeatureGroups = $CatalogItemsContent | Group-Object -Property Feature
-$MarkDownFilePath = $MarkDownFilePath
 $MarkDownContent = @()
 
 foreach($FeatureGroup in $FeatureGroups) {
