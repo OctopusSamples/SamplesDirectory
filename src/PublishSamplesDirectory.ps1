@@ -59,7 +59,10 @@ if ($existingMarkDownFileHash.Hash -ieq $newMarkDownFileHash.Hash) {
 }
 
 # 4. Copy the contents to designated location (probably somewhere where the include files live)
+Set-Content -Path $existingMarkDownFilePath -Value $markdownContent
 # 5. Create new branch (or force push existing branch if branch is present) and commit file
+New-Branch -checkoutFolder $tempCheckoutFolder -branchName "test-gh-pr"
+Commit-And-Push-Changes -checkoutFolder $tempCheckoutFolder -repoFullName $docsRepoFullName -username $GitHubUsername -accessToken $GitHubAccessToken -branchName "test-gh-pr" -fileName "docs/shared-content/samples/samples-instance-features-list.include.md"
 # 6. Create PR in GitHub on docs repo
 
 
