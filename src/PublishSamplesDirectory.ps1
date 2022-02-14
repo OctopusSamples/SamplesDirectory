@@ -48,7 +48,7 @@ $markdownContent = Get-Content $markDownFilePath
 $tempCheckoutFolder = ([System.IO.Path]::Combine($PSScriptRoot, [System.IO.Path]::GetTempPath(), [System.Guid]::NewGuid()))
 $docsRepoFolderPath = ([System.IO.Path]::Combine($tempCheckoutFolder, "docs"))
 
-Clone-Repo -checkoutFolder $tempCheckoutFolder -repoFullName $docsRepoFullName -username $GitHubUsername -accessToken $GitHubAccessToken
+New-ClonedRepo -checkoutFolder $tempCheckoutFolder -repoFullName $docsRepoFullName -username $GitHubUsername -accessToken $GitHubAccessToken
 
 # 3. Check to see if file contents are the same. If they are, nothing to do
 $existingMarkDownFilePath = ([System.IO.Path]::Combine($docsRepoFolderPath, "docs", "shared-content" , "samples", "samples-instance-features-list.include.md"))

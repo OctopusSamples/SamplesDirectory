@@ -1,4 +1,4 @@
-function Clone-Repo {
+function New-ClonedRepo {
     param(
         [string]$checkoutFolder,
         [string]$repoFullName,
