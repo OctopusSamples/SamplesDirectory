@@ -36,6 +36,9 @@ function New-Branch {
 
     Set-Location $checkoutFolder
     & git checkout -b $($branchName)
+    if ($LASTEXITCODE -ne 0) {
+        throw "Error checking out branch $branchName"
+    }
 }
 
 function Publish-Changes {
