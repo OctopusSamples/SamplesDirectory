@@ -6,9 +6,9 @@ function New-ClonedRepo {
         [string]$accessToken
     )
     $prevLocation = Get-Location
-    Write-Output "Cloning repository '$($repoFullName)' to: $($checkoutFolder)"
-    
+
     try {
+        Write-Output "Cloning repository '$($repoFullName)' to: $($checkoutFolder)"
         if (!(Test-Path -Path $checkoutFolder)) {
             Write-Verbose "Creating working directory: $checkoutFolder"
             New-Item -ItemType "Directory" -Path $checkoutFolder
@@ -35,6 +35,7 @@ function New-Branch {
     )
     $prevLocation = Get-Location
     try {
+        Write-Output "Creating branch $branchName"
         Set-Location $checkoutFolder
         & git checkout -b $($branchName)
         if ($LASTEXITCODE -ne 0) {
@@ -57,21 +58,58 @@ function Publish-Changes {
     )
     $prevLocation = Get-Location
     try {
-
+        Write-Output "Publishing changes to file $fileName to $repoFullName in branch $branchName."
         Set-Location $checkoutFolder
-    
+
+        Write-Verbose "Adding file $fileName to branch $branchName"
         & git add $fileName
         if ($LASTEXITCODE -ne 0) {
             throw "Error adding $fileName to branch: $branchName"       
         }
+        
+        Write-Verbose "Committing file $fileName"
         & git commit -m "Updating samples-instance-features-list.include.md with new directory contents"
         if ($LASTEXITCODE -ne 0) {
             throw "Error committing changes for $fileName to branch: $branchName"
         }
+
+        Write-Verbose "Pushing file $fileName changes to $branchName"
         & git push -u "https://$($username):$($accessToken)@github.com/$($repoFullName).git" $branchName
         if ($LASTEXITCODE -ne 0) {
-            throw "Error pushing changes for $fileName to branch: $branchName to $repoFullName"
+            throw "Error pushing changes for $fileName to $repoFullName in $branchName"
         }
+    }
+    finally {
+        Set-Location $prevLocation
+    }
+}
+
+function New-PullRequest {
+    param(
+        [string]$checkoutFolder,
+        [string]$repoFullName,
+        [string]$Title,
+        [string]$Body,
+        [string]$Head,
+        [string]$Base
+    )
+    $prevLocation = Get-Location
+    try {
+        Write-Output "Creating a pull request to $repoFullName for $head -> $base"
+        Set-Location $checkoutFolder
+
+        $prParams = @{
+            Uri                 = "https://github.com/$repoFullName"
+            Title               = $Title
+            Head                = $Head
+            Base                = $Base
+            Body                = $Body
+            Draft               = $true
+            MaintainerCanModify = $true
+        }
+        $pullRequest = New-GitHubPullRequest @prParams
+        Write-OctopusHighlight "PR #$($pullRequest.number) created - $($pr.html_url)"
+        Write-Verbose $pullRequest
     }
     finally {
         Set-Location $prevLocation

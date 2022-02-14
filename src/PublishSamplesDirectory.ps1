@@ -28,6 +28,21 @@ catch [System.Management.Automation.CommandNotFoundException] {
     return
 }
 
+try {
+    Install-Module -Name PowerShellForGitHub
+
+    $secureString = ($GitHubAccessToken | ConvertTo-SecureString -AsPlainText -Force)
+    $cred = New-Object System.Management.Automation.PSCredential "username is ignored", $secureString
+    Set-GitHubAuthentication -Credential $cred -SessionOnly
+    Set-GitHubConfiguration -SuppressTelemetryReminder
+    $secureString = $null # clear this out now that it's no longer needed
+    $cred = $null # clear this out now that it's no longer needed
+}
+catch {
+    Write-Error "An error occurred configuring the PowerShellForGitHub PS Module."
+    return
+}
+
 if (!(Test-Path -Path $markDownFilePath)) {
     Write-Error "Markdown file at $($markDownFilePath) doesnt exist!"
     return
@@ -37,6 +52,8 @@ if (!(Test-Path -Path $markDownFilePath)) {
 . ([System.IO.Path]::Combine($PSScriptRoot, "Git.ps1"))
 
 $docsRepoFullName = "$($docsRepoOrg)/$($docsRepoName)"
+$docsDefaultBranch = "master"
+
 if ([string]::IsNullOrWhitespace($branchName)) {
     $branchName = "enh-samplesdirectory-$([DateTime]::UtcNow.ToString('yyyyMMdd-HHmmss'))"
 }
@@ -68,15 +85,20 @@ Set-Content -Path $existingMarkDownFilePath -Value $markdownContent
 
 # 5. Create new branch and commit file
 New-Branch -checkoutFolder $docsRepoFolderPath -branchName $branchName
+
 Publish-Changes -checkoutFolder $docsRepoFolderPath -repoFullName $docsRepoFullName -username $GitHubUsername -accessToken $GitHubAccessToken -branchName $branchName -fileName "docs/shared-content/samples/samples-instance-features-list.include.md"
 
 # 6. Create PR in GitHub on docs repo
-
+$pullRequestBody = "An automated update of the features directory list for the Customer Solutions Team samples instance, https://samples.octopus.app.`n`n
+Created by the SamplesDirectory process, run from https://samples-admin.octopus.app"
+New-PullRequest -checkoutFolder $docsRepoFolderPath -repoFullName $docsRepoFullName -Title "Updating features directory for samples instance" -Body $pullRequestBody -Head $branchName -Base $docsDefaultBranch
 
 # 7. Any clear-up
 if (Test-Path -Path $tempCheckoutFolder) {
     Write-Verbose "Clearing up temporary checkout folder $tempCheckoutFolder"
     Remove-Item -Path $tempCheckoutFolder -Recurse -Force 
+
+    Clear-GitHubAuthentication
 }
 
 # 8. Profit!
