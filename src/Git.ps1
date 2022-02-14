@@ -104,7 +104,6 @@ function New-PullRequest {
             Head                = $Head
             Base                = $Base
             Body                = $Body
-            Draft               = $true
             MaintainerCanModify = $true
         }
         $pullRequest = New-GitHubPullRequest @prParams
