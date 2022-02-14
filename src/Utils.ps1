@@ -8,6 +8,16 @@ function Get-FirstOrDefault {
     return [Linq.Enumerable]::FirstOrDefault($items, $delegate);
 }
 
+function Find-AnyMatch {
+    param(
+        [Object[]]
+        $items,
+        [Func[Object, bool]]
+        $delegate
+    ) 
+    return [Linq.Enumerable]::Any($items, $delegate);
+}
+
 function Get-FeatureItem {
     param(
         $feature,
@@ -21,6 +31,7 @@ function Get-FeatureItem {
         SpaceName   = $octopusData.SpaceName;
         ProjectId   = $project.Id;
         ProjectName = $project.Name;
+        ProjectDescription = $project.Description;
         ProjectLink = $octopusData.octopusUrl + $project.Links.Web
     }
     return $item
