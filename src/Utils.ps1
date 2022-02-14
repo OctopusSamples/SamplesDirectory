@@ -8,16 +8,6 @@ function Get-FirstOrDefault {
     return [Linq.Enumerable]::FirstOrDefault($items, $delegate);
 }
 
-function Find-AnyMatch {
-    param(
-        [Object[]]
-        $items,
-        [Func[Object, bool]]
-        $delegate
-    ) 
-    return [Linq.Enumerable]::Any($items, $delegate);
-}
-
 function Get-FeatureItem {
     param(
         $feature,

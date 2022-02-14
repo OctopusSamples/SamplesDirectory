@@ -84,6 +84,17 @@ function Publish-Changes {
     }
 }
 
+function Write-OctopusHighlight {
+    param ($message)
+    try {
+        Get-Command 'Write-Highlight' 
+        Write-Highlight $message
+    }
+    catch {
+        Write-Output $message
+    }
+}
+
 function New-PullRequest {
     param(
         [string]$checkoutFolder,
@@ -107,7 +118,7 @@ function New-PullRequest {
             MaintainerCanModify = $true
         }
         $pullRequest = New-GitHubPullRequest @prParams
-        Write-OctopusHighlight "PR #$($pullRequest.number) created - $($pr.html_url)"
+        Write-OctopusHighlight "PR #$($pullRequest.number) created - $($pullRequest.html_url)"
         Write-Verbose $pullRequest
     }
     finally {

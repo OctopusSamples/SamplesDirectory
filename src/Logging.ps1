@@ -65,16 +65,4 @@ function Write-OctopusLog {
     Add-Content -Value $message -Path $logPath
 }
 
-function Write-OctopusHighlight {
-    param ($message)
-    try {
-        Get-Command 'Write-Highlight' 
-        Write-Highlight $message
-    }
-    catch{
-        Write-Output $message
-        Write-OctopusLog $message
-    }
-}
-
 Write-Host "Using version $catalogVersion of the catalog processor."
