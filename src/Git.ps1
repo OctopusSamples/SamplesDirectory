@@ -33,11 +33,16 @@ function New-Branch {
         [string]$checkoutFolder,
         [string]$branchName
     )
-
-    Set-Location $checkoutFolder
-    & git checkout -b $($branchName)
-    if ($LASTEXITCODE -ne 0) {
-        throw "Error checking out branch $branchName"
+    $prevLocation = Get-Location
+    try {
+        Set-Location $checkoutFolder
+        & git checkout -b $($branchName)
+        if ($LASTEXITCODE -ne 0) {
+            throw "Error checking out branch $branchName"
+        }
+    }
+    finally {
+        Set-Location $prevLocation
     }
 }
 
@@ -50,19 +55,25 @@ function Publish-Changes {
         [string]$branchName,
         [string]$fileName
     )
+    $prevLocation = Get-Location
+    try {
 
-    Set-Location $checkoutFolder
+        Set-Location $checkoutFolder
     
-    & git add $fileName
-    if ($LASTEXITCODE -ne 0) {
-        throw "Error adding $fileName to branch: $branchName"       
+        & git add $fileName
+        if ($LASTEXITCODE -ne 0) {
+            throw "Error adding $fileName to branch: $branchName"       
+        }
+        & git commit -m "Updating samples-instance-features-list.include.md with new directory contents"
+        if ($LASTEXITCODE -ne 0) {
+            throw "Error committing changes for $fileName to branch: $branchName"
+        }
+        & git push -u "https://$($username):$($accessToken)@github.com/$($repoFullName).git" $branchName
+        if ($LASTEXITCODE -ne 0) {
+            throw "Error pushing changes for $fileName to branch: $branchName to $repoFullName"
+        }
     }
-    & git commit -m "Updating samples-instance-features-list.include.md with new directory contents"
-    if ($LASTEXITCODE -ne 0) {
-        throw "Error committing changes for $fileName to branch: $branchName"
-    }
-    & git push -u "https://$($username):$($accessToken)@github.com/$($repoFullName).git" $branchName
-    if ($LASTEXITCODE -ne 0) {
-        throw "Error pushing changes for $fileName to branch: $branchName to $repoFullName"
+    finally {
+        Set-Location $prevLocation
     }
 }

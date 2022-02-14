@@ -46,12 +46,12 @@ $markdownContent = Get-Content $markDownFilePath
 
 # 2. Checkout the docs repo from git
 $tempCheckoutFolder = ([System.IO.Path]::Combine($PSScriptRoot, [System.IO.Path]::GetTempPath(), [System.Guid]::NewGuid()))
-$docsFolderPath = ([System.IO.Path]::Combine($tempCheckoutFolder, "docs"))
+$docsRepoFolderPath = ([System.IO.Path]::Combine($tempCheckoutFolder, "docs"))
 
 Clone-Repo -checkoutFolder $tempCheckoutFolder -repoFullName $docsRepoFullName -username $GitHubUsername -accessToken $GitHubAccessToken
 
 # 3. Check to see if file contents are the same. If they are, nothing to do
-$existingMarkDownFilePath = ([System.IO.Path]::Combine($docsFolderPath, "docs", "shared-content" , "samples", "samples-instance-features-list.include.md"))
+$existingMarkDownFilePath = ([System.IO.Path]::Combine($docsRepoFolderPath, "docs", "shared-content" , "samples", "samples-instance-features-list.include.md"))
 $existingMarkDownFileHash = Get-FileHash -Path $existingMarkDownFilePath
 $newMarkDownFileHash = Get-FileHash -Path $markDownFilePath
 
@@ -63,12 +63,12 @@ if ($existingMarkDownFileHash.Hash -ieq $newMarkDownFileHash.Hash) {
     return;
 }
 
-# 4. Copy the contents to designated location (probably somewhere where the include files live)
+# 4. Copy the contents to designated location
 Set-Content -Path $existingMarkDownFilePath -Value $markdownContent
 
 # 5. Create new branch and commit file
-New-Branch -checkoutFolder $tempCheckoutFolder -branchName $branchName
-Publish-Changes -checkoutFolder $tempCheckoutFolder -repoFullName $docsRepoFullName -username $GitHubUsername -accessToken $GitHubAccessToken -branchName "test-gh-pr" -fileName "docs/shared-content/samples/samples-instance-features-list.include.md"
+New-Branch -checkoutFolder $docsRepoFolderPath -branchName $branchName
+Publish-Changes -checkoutFolder $docsRepoFolderPath -repoFullName $docsRepoFullName -username $GitHubUsername -accessToken $GitHubAccessToken -branchName $branchName -fileName "docs/shared-content/samples/samples-instance-features-list.include.md"
 
 # 6. Create PR in GitHub on docs repo
 
