@@ -21,6 +21,7 @@ function Get-FeatureItem {
         SpaceName   = $octopusData.SpaceName;
         ProjectId   = $project.Id;
         ProjectName = $project.Name;
+        ProjectDescription = $project.Description;
         ProjectLink = $octopusData.octopusUrl + $project.Links.Web
     }
     return $item
