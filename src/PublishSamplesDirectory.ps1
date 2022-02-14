@@ -11,7 +11,9 @@ param (
     [Parameter(Mandatory = $false)]
     [string]$docsRepoName = "docs",
     [Parameter(Mandatory = $false)]
-    [string]$markDownFilePath
+    [string]$markDownFilePath,
+    [Parameter(Mandatory = $false)]
+    [string]$branchName
 )
 
 $ErrorActionPreference = "Stop"
@@ -35,6 +37,9 @@ if (!(Test-Path -Path $markDownFilePath)) {
 . ([System.IO.Path]::Combine($PSScriptRoot, "Git.ps1"))
 
 $docsRepoFullName = "$($docsRepoOrg)/$($docsRepoName)"
+if ([string]::IsNullOrWhitespace($branchName)) {
+    $branchName = "enh-samplesdirectory-$([DateTime]::UtcNow.ToString('yyyyMMdd-HHmmss'))"
+}
 
 # 1. Get the markdown file from the artifact stored in the runbook execution
 $markdownContent = Get-Content $markDownFilePath
@@ -60,9 +65,11 @@ if ($existingMarkDownFileHash.Hash -ieq $newMarkDownFileHash.Hash) {
 
 # 4. Copy the contents to designated location (probably somewhere where the include files live)
 Set-Content -Path $existingMarkDownFilePath -Value $markdownContent
-# 5. Create new branch (or force push existing branch if branch is present) and commit file
-New-Branch -checkoutFolder $tempCheckoutFolder -branchName "test-gh-pr"
-Commit-And-Push-Changes -checkoutFolder $tempCheckoutFolder -repoFullName $docsRepoFullName -username $GitHubUsername -accessToken $GitHubAccessToken -branchName "test-gh-pr" -fileName "docs/shared-content/samples/samples-instance-features-list.include.md"
+
+# 5. Create new branch and commit file
+New-Branch -checkoutFolder $tempCheckoutFolder -branchName $branchName
+Publish-Changes -checkoutFolder $tempCheckoutFolder -repoFullName $docsRepoFullName -username $GitHubUsername -accessToken $GitHubAccessToken -branchName "test-gh-pr" -fileName "docs/shared-content/samples/samples-instance-features-list.include.md"
+
 # 6. Create PR in GitHub on docs repo
 
 

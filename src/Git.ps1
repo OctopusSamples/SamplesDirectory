@@ -38,7 +38,7 @@ function New-Branch {
     & git checkout -b $($branchName)
 }
 
-function Commit-And-Push-Changes {
+function Publish-Changes {
     param(
         [string]$checkoutFolder,
         [string]$repoFullName,
@@ -51,6 +51,15 @@ function Commit-And-Push-Changes {
     Set-Location $checkoutFolder
     
     & git add $fileName
-    & git commit -m "Committing changes for samples instance features list markdown."
+    if ($LASTEXITCODE -ne 0) {
+        throw "Error adding $fileName to branch: $branchName"       
+    }
+    & git commit -m "Updating samples-instance-features-list.include.md with new directory contents"
+    if ($LASTEXITCODE -ne 0) {
+        throw "Error committing changes for $fileName to branch: $branchName"
+    }
     & git push -u "https://$($username):$($accessToken)@github.com/$($repoFullName).git" $branchName
+    if ($LASTEXITCODE -ne 0) {
+        throw "Error pushing changes for $fileName to branch: $branchName to $repoFullName"
+    }
 }
