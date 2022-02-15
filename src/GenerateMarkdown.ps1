@@ -19,7 +19,7 @@ foreach ($FeatureGroup in $FeatureGroups) {
     foreach ($SpaceGroup in $SpaceGroups) {
         $SpaceName = $SpaceGroup.Name
         $MarkDownContent += "- *Space:* **$($SpaceName)**"
-        $Projects = $SpaceGroup.Group
+        $Projects = $SpaceGroup.Group | Sort-Object -Property ProjectName
         foreach ($Project in $Projects) {
             $ProjectName = $Project.ProjectName
             $ProjectUrl = $Project.ProjectLink
