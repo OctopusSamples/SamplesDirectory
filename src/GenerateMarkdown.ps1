@@ -8,25 +8,29 @@ $CatalogItemsContent = Get-Content $CatalogItemsFilePath | ConvertFrom-Json
 $FeatureGroups = $CatalogItemsContent | Group-Object -Property Feature
 $MarkDownContent = @()
 foreach ($FeatureGroup in $FeatureGroups) {
-    $MarkDownContent += "<details>"
     $FeatureName = $FeatureGroup.Name
-    $MarkDownContent += @"
-    <summary>$($FeatureName)</summary>
-    
-"@
+    $MarkDownContent += "### $($FeatureName)"
     $SpaceGroups = $FeatureGroup.Group | Group-Object -Property SpaceName
 
     foreach ($SpaceGroup in $SpaceGroups) {
         $SpaceName = $SpaceGroup.Name
-        $MarkDownContent += "- *Space:* **$($SpaceName)**"
+        $MarkDownContent += "- **$($SpaceName)**"
         $Projects = $SpaceGroup.Group | Sort-Object -Property ProjectName
         foreach ($Project in $Projects) {
             $ProjectName = $Project.ProjectName
             $ProjectUrl = $Project.ProjectLink
-            $MarkDownContent += "  - *Project:* [$($ProjectName)]($($ProjectUrl))"
+            $ProjectDescription = $Project.ProjectDescription
+            $MarkDownContent += "  - [$($ProjectName)]($($ProjectUrl))"
+            $MarkDownContent += @"  
+  <dd>
+  
+  $($ProjectDescription)
+  
+  </dd>
+            
+"@
         }
     }
-    $MarkDownContent += "</details>"
 }
 
 New-Item -Path $MarkDownFilePath -ItemType File 
