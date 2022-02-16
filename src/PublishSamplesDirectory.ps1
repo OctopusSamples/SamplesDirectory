@@ -29,6 +29,7 @@ catch [System.Management.Automation.CommandNotFoundException] {
 }
 
 try {
+    Write-Output "Installing 'PowerShellForGitHub' PowerShell module"
     Install-Module -Name PowerShellForGitHub
 
     $secureString = ($GitHubAccessToken | ConvertTo-SecureString -AsPlainText -Force)
@@ -69,6 +70,11 @@ New-ClonedRepo -checkoutFolder $tempCheckoutFolder -repoFullName $docsRepoFullNa
 
 # 3. Check to see if file contents are the same. If they are, nothing to do
 $existingMarkDownFilePath = ([System.IO.Path]::Combine($docsRepoFolderPath, "docs", "shared-content" , "samples", "samples-instance-features-list.include.md"))
+
+if(!(Test-Path -Path $existingMarkDownFilePath)) {
+    Write-Error "Existing markdown file could not be found at path: $existingMarkDownFilePath"
+    return;
+}
 $existingMarkDownFileHash = Get-FileHash -Path $existingMarkDownFilePath
 $newMarkDownFileHash = Get-FileHash -Path $markDownFilePath
 
