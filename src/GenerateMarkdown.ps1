@@ -39,7 +39,7 @@ foreach ($FeatureGroup in $FeatureGroups) {
                     $RemainingDescription = ($RemainingDescParts | Join-String -Separator " ").Trim()
                     $ProjectMarkdown += "<span class='collapse' id='$Id'> *$($RemainingDescription.Trim())*</span>
 <span>
-<a href='#$Id' data-toggle='collapse'> ... <i class='fa fa-caret-down'></i></a>
+<a href='#$Id' data-toggle='collapse'> ...</a>
 </span>"
                 }
                 else {
@@ -56,7 +56,8 @@ foreach ($FeatureGroup in $FeatureGroups) {
 $MarkDownContent += @"
 
 <style>
-  .collapse.in { display: inline !important; }
+.collapse + span > a::after { content: " >>" }
+.collapse.show + span > a::after { content: " <<" }
 </style>
 "@
 
