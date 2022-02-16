@@ -3,8 +3,6 @@ param (
     [Parameter(Mandatory = $false)]
     [string]$GitHubUsername,
     [Parameter(Mandatory = $false)]
-    [string]$GitHubUserEmail,
-    [Parameter(Mandatory = $false)]
     [string]$GitHubAccessToken,
     [Parameter(Mandatory = $false)]
     [string]$docsRepoOrg = "OctopusDeploy",
