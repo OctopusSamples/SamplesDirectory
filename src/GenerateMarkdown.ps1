@@ -52,14 +52,5 @@ foreach ($FeatureGroup in $FeatureGroups) {
     }
 }
 
-# Pop style for collapsible project descriptions at the end
-$MarkDownContent += @"
-
-<style>
-.collapse + span > a::after { content: " >>" }
-.collapse.show + span > a::after { content: " <<" }
-</style>
-"@
-
 New-Item -Path $MarkDownFilePath -ItemType File -Force
 Set-Content -Path $MarkDownFilePath -Value $MarkDownContent -Force
