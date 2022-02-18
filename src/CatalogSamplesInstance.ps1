@@ -28,7 +28,7 @@ $OctopusUrl = $OctopusUrl.TrimEnd("/")
 $SpaceList = Get-OctopusSpaceList -octopusUrl $OctopusUrl -octopusApiKey $OctopusApiKey
 
 foreach ($space in $SpaceList) {
-    Write-Host "`nStarting catalog of space '$($space.Name)'`n"
+    Write-Output "`nStarting catalog of space '$($space.Name)'`n"
     
     $octopusData = Get-OctopusData -octopusUrl $OctopusUrl -octopusApiKey $OctopusApiKey -space $Space
     $projects = $octopusData.ProjectList
@@ -64,8 +64,8 @@ foreach ($space in $SpaceList) {
 $catalogEndDateTime = Get-Date
 $catalogElapsedTime = New-TimeSpan $catalogStartDateTime $catalogEndDateTime
 
-Write-Host "It took $($catalogElapsedTime.ToString("hh\:mm\:ss\.ff")) for the catalog process to finish."
-Write-Host "Found $($items.Length) item(s).`n"
+Write-Output "It took $($catalogElapsedTime.ToString("hh\:mm\:ss\.ff")) for the catalog process to finish."
+Write-Output "Found $($items.Length) item(s).`n"
 
 # Sort items
 $items = $items | Sort-Object -Property ProjectId

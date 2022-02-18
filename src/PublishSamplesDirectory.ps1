@@ -11,7 +11,9 @@ param (
     [Parameter(Mandatory = $false)]
     [string]$markDownFilePath,
     [Parameter(Mandatory = $false)]
-    [string]$branchName
+    [string]$branchName,
+    [Parameter(Mandatory = $false)]
+    [bool]$WhatIf = $True
 )
 
 $ErrorActionPreference = "Stop"
@@ -69,7 +71,7 @@ New-ClonedRepo -checkoutFolder $tempCheckoutFolder -repoFullName $docsRepoFullNa
 # 3. Check to see if file contents are the same. If they are, nothing to do
 $existingMarkDownFilePath = ([System.IO.Path]::Combine($docsRepoFolderPath, "docs", "shared-content" , "samples", "samples-instance-features-list.include.md"))
 
-if(!(Test-Path -Path $existingMarkDownFilePath)) {
+if (!(Test-Path -Path $existingMarkDownFilePath)) {
     Write-Error "Existing markdown file could not be found at path: $existingMarkDownFilePath"
     return;
 }
@@ -80,22 +82,24 @@ Write-Verbose "Existing samples-instance-features-list.include.md FileHash: $($e
 Write-Verbose "New content for features-list FileHash: $($newMarkDownFileHash.Hash)"
 
 if ($existingMarkDownFileHash.Hash -ieq $newMarkDownFileHash.Hash) {
-    Write-Host "New content file hash matches existing content file hash. Nothing to update"
+    Write-Output "New content file hash matches existing content file hash. Nothing to update"
     return;
 }
 
 # 4. Copy the contents to designated location
 Set-Content -Path $existingMarkDownFilePath -Value $markdownContent
 
-# 5. Create new branch and commit file
-New-Branch -checkoutFolder $docsRepoFolderPath -branchName $branchName
+Write-Output "WhatIf set to True."
 
-Publish-Changes -checkoutFolder $docsRepoFolderPath -repoFullName $docsRepoFullName -username $GitHubUsername -accessToken $GitHubAccessToken -branchName $branchName -fileName "docs/shared-content/samples/samples-instance-features-list.include.md"
+# 5. Create new branch and commit file
+New-Branch -checkoutFolder $docsRepoFolderPath -branchName $branchName -whatIf $WhatIf
+
+Publish-Changes -checkoutFolder $docsRepoFolderPath -repoFullName $docsRepoFullName -username $GitHubUsername -accessToken $GitHubAccessToken -branchName $branchName -fileName "docs/shared-content/samples/samples-instance-features-list.include.md" -whatIf $WhatIf
 
 # 6. Create PR in GitHub on docs repo
 $pullRequestBody = "An automated update of the features directory list for the Customer Solutions Team samples instance, https://samples.octopus.app.`n`n
 Created by the SamplesDirectory process, run from https://samples-admin.octopus.app"
-New-PullRequest -checkoutFolder $docsRepoFolderPath -repoFullName $docsRepoFullName -Title "Updating features directory for samples instance" -Body $pullRequestBody -Head $branchName -Base $docsDefaultBranch
+New-PullRequest -checkoutFolder $docsRepoFolderPath -repoFullName $docsRepoFullName -Title "Updating features directory for samples instance" -Body $pullRequestBody -Head $branchName -Base $docsDefaultBranch -whatIf $WhatIf
 
 # 7. Any clear-up
 if (Test-Path -Path $tempCheckoutFolder) {
