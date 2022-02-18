@@ -3,6 +3,8 @@ param (
     [Parameter(Mandatory = $false)]
     [string]$GitHubUsername,
     [Parameter(Mandatory = $false)]
+    [string]$GitHubUserEmail,
+    [Parameter(Mandatory = $false)]
     [string]$GitHubAccessToken,
     [Parameter(Mandatory = $false)]
     [string]$docsRepoOrg = "OctopusDeploy",
@@ -94,7 +96,7 @@ Write-Output "WhatIf set to True."
 # 5. Create new branch and commit file
 New-Branch -checkoutFolder $docsRepoFolderPath -branchName $branchName -whatIf $WhatIf
 
-Publish-Changes -checkoutFolder $docsRepoFolderPath -repoFullName $docsRepoFullName -username $GitHubUsername -accessToken $GitHubAccessToken -branchName $branchName -fileName "docs/shared-content/samples/samples-instance-features-list.include.md" -whatIf $WhatIf
+Publish-Changes -checkoutFolder $docsRepoFolderPath -repoFullName $docsRepoFullName -username $GitHubUsername -useremail $GitHubUserEmail -accessToken $GitHubAccessToken -branchName $branchName -fileName "docs/shared-content/samples/samples-instance-features-list.include.md" -whatIf $WhatIf
 
 # 6. Create PR in GitHub on docs repo
 $pullRequestBody = "An automated update of the features directory list for the Customer Solutions Team samples instance, https://samples.octopus.app.`n`n

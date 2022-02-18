@@ -75,6 +75,7 @@ function Publish-Changes {
         [string]$checkoutFolder,
         [string]$repoFullName,
         [string]$username,
+        [string]$useremail,
         [string]$accessToken,
         [string]$branchName,
         [string]$fileName,
@@ -89,6 +90,18 @@ function Publish-Changes {
         try {
             Write-Output "Publishing changes to file $fileName to $repoFullName in branch $branchName."
             Set-Location $checkoutFolder
+
+            Write-Verbose "Running git config for user.email"
+            & git config user.email $useremail
+            if ($LASTEXITCODE -ne 0) {
+                throw "Error running git config for user.email"       
+            }
+
+            Write-Verbose "Running git config for user.name"
+            & git config user.name $username
+            if ($LASTEXITCODE -ne 0) {
+                throw "Error running git config for user.name"       
+            }
 
             Write-Verbose "Adding file $fileName to branch $branchName"
             & git add $fileName
