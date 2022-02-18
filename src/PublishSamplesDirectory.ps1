@@ -31,7 +31,7 @@ catch [System.Management.Automation.CommandNotFoundException] {
 }
 
 try {
-    Write-Output "Installing 'PowerShellForGitHub' PowerShell module"
+    Write-Host "Installing 'PowerShellForGitHub' PowerShell module"
     Install-Module -Name PowerShellForGitHub -Force -AllowClobber
 
     $secureString = ($GitHubAccessToken | ConvertTo-SecureString -AsPlainText -Force)
@@ -84,14 +84,14 @@ Write-Verbose "Existing samples-instance-features-list.include.md FileHash: $($e
 Write-Verbose "New content for features-list FileHash: $($newMarkDownFileHash.Hash)"
 
 if ($existingMarkDownFileHash.Hash -ieq $newMarkDownFileHash.Hash) {
-    Write-Output "New content file hash matches existing content file hash. Nothing to update"
+    Write-Host "New content file hash matches existing content file hash. Nothing to update"
     return;
 }
 
 # 4. Copy the contents to designated location
 Set-Content -Path $existingMarkDownFilePath -Value $markdownContent
 
-Write-Output "WhatIf set to True."
+Write-Host "WhatIf set to True."
 
 # 5. Create new branch and commit file
 New-Branch -checkoutFolder $docsRepoFolderPath -branchName $branchName -whatIf $WhatIf

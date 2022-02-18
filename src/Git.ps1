@@ -6,7 +6,7 @@ function Write-OctopusHighlight {
         Write-Highlight $message
     }
     catch {
-        Write-Output $message
+        Write-Host $message
     }
 }
 
@@ -20,8 +20,9 @@ function New-ClonedRepo {
     $prevLocation = Get-Location
 
     try {
-        Write-Output "##octopus[stderr-progress]"
-        Write-Output "Cloning repository '$($repoFullName)' to: $($checkoutFolder)"
+        Write-Host "##octopus[stderr-progress]"
+
+        Write-Host "Cloning repository '$($repoFullName)' to: $($checkoutFolder)"
         if (!(Test-Path -Path $checkoutFolder)) {
             Write-Verbose "Creating working directory: $checkoutFolder"
             New-Item -ItemType "Directory" -Path $checkoutFolder
@@ -37,7 +38,7 @@ function New-ClonedRepo {
         throw "Error cloning git repository '$($repoFullName)' - $($_.Message)"       
     }
     finally {
-        Write-Output "##octopus[stderr-default]"
+        Write-Host "##octopus[stderr-default]"
         Set-Location $prevLocation
     }
 }
@@ -54,10 +55,10 @@ function New-Branch {
         Write-OctopusHighlight "WhatIf: Would have created a new branch called $branchName"
     }
     else {
-    
-
         try {
-            Write-Output "Creating branch $branchName"
+            Write-Host "##octopus[stderr-progress]"
+
+            Write-Host "Creating branch $branchName"
             Set-Location $checkoutFolder
             & git checkout -b $($branchName)
             if ($LASTEXITCODE -ne 0) {
@@ -65,6 +66,7 @@ function New-Branch {
             }
         }
         finally {
+            Write-Host "##octopus[stderr-default]"
             Set-Location $prevLocation
         }
     }
@@ -88,7 +90,9 @@ function Publish-Changes {
     }
     else {
         try {
-            Write-Output "Publishing changes to file $fileName to $repoFullName in branch $branchName."
+            Write-Host "##octopus[stderr-progress]"
+
+            Write-Host "Publishing changes to file $fileName to $repoFullName in branch $branchName."
             Set-Location $checkoutFolder
 
             Write-Verbose "Running git config for user.email"
@@ -122,6 +126,7 @@ function Publish-Changes {
             }
         }
         finally {
+            Write-Host "##octopus[stderr-default]"
             Set-Location $prevLocation
         }
     }
@@ -144,7 +149,7 @@ function New-PullRequest {
     }
     else {
         try {
-            Write-Output "Creating a pull request to $repoFullName for $head -> $base"
+            Write-Host "Creating a pull request to $repoFullName for $head -> $base"
             Set-Location $checkoutFolder
 
             $prParams = @{
@@ -156,7 +161,7 @@ function New-PullRequest {
                 MaintainerCanModify = $true
             }
             $pullRequest = New-GitHubPullRequest @prParams
-            Write-OctopusHighlight "PR #$($pullRequest.number) created - $($pullRequest.html_url)"
+            Write-OctopusHighlight "PR #$($pullRequest.number) created - [$($pullRequest.html_url)]($($pullRequest.html_url))"
             Write-Verbose $pullRequest
         }
         finally {
