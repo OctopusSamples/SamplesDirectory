@@ -2,7 +2,7 @@
 function Write-OctopusHighlight {
     param ($message)
     try {
-        Get-Command 'Write-Highlight' 
+        Get-Command 'Write-Highlight' | Out-Null
         Write-Highlight $message
     }
     catch {
@@ -20,6 +20,7 @@ function New-ClonedRepo {
     $prevLocation = Get-Location
 
     try {
+        Write-Output "##octopus[stderr-progress]"
         Write-Output "Cloning repository '$($repoFullName)' to: $($checkoutFolder)"
         if (!(Test-Path -Path $checkoutFolder)) {
             Write-Verbose "Creating working directory: $checkoutFolder"
@@ -36,6 +37,7 @@ function New-ClonedRepo {
         throw "Error cloning git repository '$($repoFullName)' - $($_.Message)"       
     }
     finally {
+        Write-Output "##octopus[stderr-default]"
         Set-Location $prevLocation
     }
 }
