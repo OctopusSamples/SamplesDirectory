@@ -30,7 +30,7 @@ catch [System.Management.Automation.CommandNotFoundException] {
 
 try {
     Write-Output "Installing 'PowerShellForGitHub' PowerShell module"
-    Install-Module -Name PowerShellForGitHub
+    Install-Module -Name PowerShellForGitHub -Force -AllowClobber
 
     $secureString = ($GitHubAccessToken | ConvertTo-SecureString -AsPlainText -Force)
     $cred = New-Object System.Management.Automation.PSCredential "username is ignored", $secureString
