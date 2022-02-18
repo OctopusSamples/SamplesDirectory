@@ -94,7 +94,6 @@ if ($existingMarkDownFileHash.Hash -ieq $newMarkDownFileHash.Hash) {
     return;
 }
 
-return 
 # 4. Copy the contents to designated location
 Set-Content -Path $existingMarkDownFilePath -Value $markdownContent
 
