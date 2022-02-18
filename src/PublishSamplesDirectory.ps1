@@ -71,27 +71,34 @@ $docsRepoFolderPath = ([System.IO.Path]::Combine($tempCheckoutFolder, "docs"))
 New-ClonedRepo -checkoutFolder $tempCheckoutFolder -repoFullName $docsRepoFullName -username $GitHubUsername -accessToken $GitHubAccessToken
 
 # 3. Check to see if file contents are the same. If they are, nothing to do
-$existingMarkDownFilePath = ([System.IO.Path]::Combine($docsRepoFolderPath, "docs", "shared-content" , "samples", "samples-instance-features-list.include.md"))
+$existingMarkdownFilePath = ([System.IO.Path]::Combine($docsRepoFolderPath, "docs", "shared-content" , "samples", "samples-instance-features-list.include.md"))
 
 if (!(Test-Path -Path $existingMarkDownFilePath)) {
     Write-Error "Existing markdown file could not be found at path: $existingMarkDownFilePath"
     return;
 }
-$existingMarkDownFileHash = Get-FileHash -Path $existingMarkDownFilePath
+$existingMarkdownContent = Get-Content -Path $existingMarkDownFilePath
+$existingMarkdownTempFile = New-TemporaryFile
+
+# We write out the content from the Git repo to a temp file, to workaround LF -> CRLF issues.
+Write-Verbose "Writing existing markdown file to $existingMarkdownTempFile to test file hashes"
+Set-Content -Path $existingMarkdownTempFile -Value $existingMarkdownContent
+$existingMarkDownFileHash = Get-FileHash -Path $existingMarkdownTempFile
 $newMarkDownFileHash = Get-FileHash -Path $markDownFilePath
 
-Write-Verbose "Existing samples-instance-features-list.include.md FileHash: $($existingMarkDownFileHash.Hash)"
-Write-Verbose "New content for features-list FileHash: $($newMarkDownFileHash.Hash)"
+Write-Host "Existing samples-instance-features-list.include.md FileHash: $($existingMarkDownFileHash.Hash)"
+Write-Host "New content for features-list FileHash: $($newMarkDownFileHash.Hash)"
 
 if ($existingMarkDownFileHash.Hash -ieq $newMarkDownFileHash.Hash) {
     Write-Host "New content file hash matches existing content file hash. Nothing to update"
     return;
 }
 
+return 
 # 4. Copy the contents to designated location
 Set-Content -Path $existingMarkDownFilePath -Value $markdownContent
 
-Write-Host "WhatIf set to True."
+Write-Host "WhatIf set to $WhatIf."
 
 # 5. Create new branch and commit file
 New-Branch -checkoutFolder $docsRepoFolderPath -branchName $branchName -whatIf $WhatIf
