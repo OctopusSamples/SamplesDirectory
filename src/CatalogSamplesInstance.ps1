@@ -15,6 +15,7 @@ param (
 . ([System.IO.Path]::Combine($PSScriptRoot, "Utils.ps1"))
 
 # Include feature processors
+. ([System.IO.Path]::Combine($PSScriptRoot, "Features", "Azure.ps1"))
 . ([System.IO.Path]::Combine($PSScriptRoot, "Features", "IIS.ps1"))
 . ([System.IO.Path]::Combine($PSScriptRoot, "Features", "Java.ps1"))
 . ([System.IO.Path]::Combine($PSScriptRoot, "Features", "Kubernetes.ps1"))
@@ -39,6 +40,7 @@ foreach ($space in $SpaceList) {
         # Check each project deployment process.
         $deploymentProcess = Get-OctopusProjectDeploymentProcess -project $project -octopusData $octopusData
         foreach ($deploymentstep in $deploymentProcess.Steps) {
+            $items = @(Find-AzureFeatureInStep -items $items -step $deploymentstep -octopusData $octopusData -project $project)
             $items = @(Find-IISFeatureInStep -items $items -step $deploymentstep -octopusData $octopusData -project $project)
             $items = @(Find-JavaFeatureInStep -items $items -step $deploymentstep -octopusData $octopusData -project $project)
             $items = @(Find-KubernetesFeatureInStep -items $items -step $deploymentstep -octopusData $octopusData -project $project)
@@ -51,6 +53,7 @@ foreach ($space in $SpaceList) {
         foreach ($runbook in $projectRunbooks) {
             $runbookProcess = Get-OctopusRunbookProcess -runbook $runbook -octopusData $octopusData
             foreach ($runbookStep in $runbookProcess.Steps) {
+                $items = @(Find-AzureFeatureInStep -items $items -step $runbookStep -octopusData $octopusData -project $project)
                 $items = @(Find-IISFeatureInStep -items $items -step $runbookStep -octopusData $octopusData -project $project)
                 $items = @(Find-JavaFeatureInStep -items $items -step $runbookStep -octopusData $octopusData -project $project)
                 $items = @(Find-KubernetesFeatureInStep -items $items -step $runbookStep -octopusData $octopusData -project $project)

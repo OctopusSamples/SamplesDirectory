@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-Finds the Kubernetes feature within projects.
+Looks for the Kubernetes feature within a deployment or runbook step.
 
 .DESCRIPTION
 The catalog criteria for the Kubernetes feature is:
@@ -81,13 +81,13 @@ function Find-KubernetesFeatureInStep {
     }
     # Check step for any step template containing the name 'Kubernetes'
     if (Test-StepTemplateNameContainsValue -step $step -name "Kubernetes" -octopusData $octopusData) {
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has a step template. with the word Kubernetes in it." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has a step template. with the word 'Kubernetes' in it." 
         $items += $itemToCatalog
         return $items;
     }
     # Check step for any step template containing the name 'Helm'
     if (Test-StepTemplateNameContainsValue -step $step -name "Helm" -octopusData $octopusData) {
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has a step template. with the word Helm in it." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has a step template. with the word 'Helm' in it." 
         $items += $itemToCatalog
         return $items;
     }

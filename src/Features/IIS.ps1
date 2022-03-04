@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-Finds the IIS feature within projects.
+Looks for the IIS feature within a deployment or runbook step.
 
 .DESCRIPTION
 The catalog criteria for the IIS feature is:
@@ -39,7 +39,7 @@ function Find-IISFeatureInStep {
     }
     # Check deployment step for any step template containing the name 'IIS'
     if (Test-StepTemplateNameContainsValue -step $step -name "IIS" -octopusData $octopusData) {
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has a step template in the deployment process with the word IIS in it." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has a step template in the deployment process with the word 'IIS' in it." 
         $items += $itemToCatalog
         return $items;
     }
