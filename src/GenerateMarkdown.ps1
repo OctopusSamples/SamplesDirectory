@@ -40,7 +40,8 @@ foreach ($FeatureGroup in $FeatureGroups) {
                     $ProjectMarkdown += "<span class='collapse' id='$Id'> *$($RemainingDescription.Trim())*</span>
 <span>
 <a href='#$Id' data-toggle='collapse'> ...</a>
-</span>"
+</span>
+"
                 }
                 else {
                     $ProjectMarkdown += ": *$ProjectDescription*
