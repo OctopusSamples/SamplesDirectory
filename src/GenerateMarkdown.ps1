@@ -20,33 +20,16 @@ foreach ($FeatureGroup in $FeatureGroups) {
 **$($SpaceName)**"
         $Projects = $SpaceGroup.Group | Sort-Object -Property ProjectName
         foreach ($Project in $Projects) {
-            $Id = "more-$($featureName)-$($project.SpaceId)-$($project.ProjectId)".ToLowerInvariant()
             $ProjectName = $Project.ProjectName
             $ProjectDescription = $Project.ProjectDescription
             $ProjectUrl = $Project.ProjectLink
-            $ProjectMarkdown = "  - [$($ProjectName)]($($ProjectUrl))"
+            $ProjectMarkdown = "  - <a href=`"$($ProjectUrl)`" target=`"_blank`">$($ProjectName)</a>"
             
             if (![string]::IsNullOrWhitespace($ProjectDescription)) {
                 # Flatten new lines
-                $ProjectDescription = ($ProjectDescription -Replace "`n", " ") -Replace "  ", " "
-            
-                $ProjectDescParts = ($ProjectDescription -Split " ")
-                if ($ProjectDescParts.Length -gt 10) {
-                    $InitialDescParts = $ProjectDescParts | Select-Object -First 10
-                    $InitialDescription = ($InitialDescParts | Join-String -Separator " ").Trim()
-                    $ProjectMarkdown += ": *$InitialDescription*"
-                    $RemainingDescParts = $ProjectDescParts | Select-Object -Skip 10
-                    $RemainingDescription = ($RemainingDescParts | Join-String -Separator " ").Trim()
-                    $ProjectMarkdown += "<span class='collapse' id='$Id'> *$($RemainingDescription.Trim())*</span>
-<span>
-<a href='#$Id' data-toggle='collapse'> ...</a>
-</span>
-"
-                }
-                else {
-                    $ProjectMarkdown += ": *$ProjectDescription*
-                    "
-                }
+                $ProjectDescription = (($ProjectDescription -Replace "`n", " ") -Replace "  ", " ").Trim()
+                $ProjectMarkdown += ": *$ProjectDescription*
+                "
             }
             $MarkDownContent += $ProjectMarkdown
         }
