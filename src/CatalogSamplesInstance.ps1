@@ -54,7 +54,7 @@ foreach ($space in $SpaceList) {
                 $items = @(Find-IISFeatureInStep -items $items -step $runbookStep -octopusData $octopusData -project $project)
                 $items = @(Find-JavaFeatureInStep -items $items -step $runbookStep -octopusData $octopusData -project $project)
                 $items = @(Find-KubernetesFeatureInStep -items $items -step $runbookStep -octopusData $octopusData -project $project)
-                $items = @(Find-TerraformFeatureInStep -items $items -step $deploymentstep -octopusData $octopusData -project $project)
+                $items = @(Find-TerraformFeatureInStep -items $items -step $runbookStep -octopusData $octopusData -project $project)
             }
         }
     } 
