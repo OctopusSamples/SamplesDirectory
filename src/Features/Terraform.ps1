@@ -29,25 +29,25 @@ function Find-TerraformFeatureInStep {
 
     # Apply a Terraform template
     if ($step.Actions[0].ActionType -eq "Octopus.TerraformApply") { 
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the built-in Terraform apply step." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the built-in 'Apply a Terraform template' step." 
         $items += $itemToCatalog
         return $items;
     }
     # Destroy terraform resources
     if ($step.Actions[0].ActionType -eq "Octopus.TerraformDestroy") { 
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the built-in Terraform destroy step." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the built-in 'Destroy terraform resources' step." 
         $items += $itemToCatalog
         return $items;
     }
     # Plan to apply a Terraform template
     if ($step.Actions[0].ActionType -eq "Octopus.TerraformPlan") { 
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the built-in Terraform plan step." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the built-in 'Plan to apply a Terraform template' step." 
         $items += $itemToCatalog
         return $items;
     }
     # Plan a Terraform destroy
     if ($step.Actions[0].ActionType -eq "Octopus.TerraformPlanDestroy") { 
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the built-in Terraform plan destroy step." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the built-in 'Plan a Terraform destroy' step." 
         $items += $itemToCatalog
         return $items;
     }
