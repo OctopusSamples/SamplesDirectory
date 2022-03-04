@@ -67,13 +67,13 @@ function Find-JavaFeatureInStep {
     }
     # Check step for any step template containing the name 'Tomcat'
     if (Test-StepTemplateNameContainsValue -step $step -name "Tomcat" -octopusData $octopusData) {
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has a step template in the deployment process with the word 'Tomcat' in it." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has a step template with the word 'Tomcat' in it." 
         $items += $itemToCatalog
         return $items;
     }
     # Check step for any step template containing the name 'WildFly'
     if (Test-StepTemplateNameContainsValue -step $step -name "WildFly" -octopusData $octopusData) {
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has a step template in the deployment process with the word 'WildFly' in it." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has a step template with the word 'WildFly' in it." 
         $items += $itemToCatalog
         return $items;
     }

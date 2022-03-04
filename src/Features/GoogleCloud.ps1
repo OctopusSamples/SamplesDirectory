@@ -34,14 +34,14 @@ function Find-GoogleCloudFeatureInStep {
 
     # Check deployment step for any step template containing the name 'Google'
     if (Test-StepTemplateNameContainsValue -step $step -name "Google" -octopusData $octopusData) {
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has a step template in the deployment process with the word 'Google' in it." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has a step template with the word 'Google' in it." 
         $items += $itemToCatalog
         return $items;
     }
 
     # Check deployment step for any step template containing the name 'GCP'
     if (Test-StepTemplateNameContainsValue -step $step -name "GCP" -octopusData $octopusData) {
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has a step template in the deployment process with the word 'GCP' in it." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has a step template with the word 'GCP' in it." 
         $items += $itemToCatalog
         return $items;
     }

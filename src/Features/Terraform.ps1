@@ -54,7 +54,7 @@ function Find-TerraformFeatureInStep {
 
     # Check deployment step for any step template containing the name 'Terraform'
     if (Test-StepTemplateNameContainsValue -step $step -name "Terraform" -octopusData $octopusData) {
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has a step template in the deployment process with the word 'Terraform' in it." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has a step template with the word 'Terraform' in it." 
         $items += $itemToCatalog
         return $items;
     }

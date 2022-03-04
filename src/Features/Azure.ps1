@@ -75,7 +75,7 @@ function Find-AzureFeatureInStep {
 
     # Check deployment step for any step template containing the name 'Azure'
     if (Test-StepTemplateNameContainsValue -step $step -name "Azure" -octopusData $octopusData) {
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has a step template in the deployment process with the word 'Azure' in it." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has a step template with the word 'Azure' in it." 
         $items += $itemToCatalog
         return $items;
     }
