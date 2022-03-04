@@ -18,6 +18,7 @@ param (
 . ([System.IO.Path]::Combine($PSScriptRoot, "Features", "IIS.ps1"))
 . ([System.IO.Path]::Combine($PSScriptRoot, "Features", "Java.ps1"))
 . ([System.IO.Path]::Combine($PSScriptRoot, "Features", "Kubernetes.ps1"))
+. ([System.IO.Path]::Combine($PSScriptRoot, "Features", "Terraform.ps1"))
 
 $ErrorActionPreference = "Stop"
 
@@ -41,8 +42,7 @@ foreach ($space in $SpaceList) {
             $items = @(Find-IISFeatureInStep -items $items -step $deploymentstep -octopusData $octopusData -project $project)
             $items = @(Find-JavaFeatureInStep -items $items -step $deploymentstep -octopusData $octopusData -project $project)
             $items = @(Find-KubernetesFeatureInStep -items $items -step $deploymentstep -octopusData $octopusData -project $project)
-            
-            # Add more features here...
+            $items = @(Find-TerraformFeatureInStep -items $items -step $deploymentstep -octopusData $octopusData -project $project)
         }
 
         # Check runbook processes
@@ -54,8 +54,7 @@ foreach ($space in $SpaceList) {
                 $items = @(Find-IISFeatureInStep -items $items -step $runbookStep -octopusData $octopusData -project $project)
                 $items = @(Find-JavaFeatureInStep -items $items -step $runbookStep -octopusData $octopusData -project $project)
                 $items = @(Find-KubernetesFeatureInStep -items $items -step $runbookStep -octopusData $octopusData -project $project)
-                
-                # Add more features here...
+                $items = @(Find-TerraformFeatureInStep -items $items -step $deploymentstep -octopusData $octopusData -project $project)
             }
         }
     } 

@@ -25,6 +25,7 @@ function Find-IISFeatureInStep {
         return $items;
     }
 
+    # Deploy to IIS
     if ($step.Actions[0].ActionType -eq "Octopus.IIS") { 
         Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the built-in IIS step." 
         $items += $itemToCatalog
