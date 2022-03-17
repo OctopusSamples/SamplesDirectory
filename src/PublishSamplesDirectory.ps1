@@ -104,8 +104,8 @@ foreach ($markdownFile in $markdownFiles) {
         $existingMarkDownFileHash = Get-FileHash -Path $existingMarkdownTempFile
         $newMarkDownFileHash = Get-FileHash -Path $markdownFilePath
 
-        Write-Host "Existing $markdownFilename FileHash: $($existingMarkDownFileHash.Hash)"
-        Write-Host "New file $markdownFilename FileHash: $($newMarkDownFileHash.Hash)"
+        Write-Verbose "Existing $markdownFilename FileHash: $($existingMarkDownFileHash.Hash)"
+        Write-Verbose "New file $markdownFilename FileHash: $($newMarkDownFileHash.Hash)"
         
         # 3.2.4 Compare hashes and continue if nothing to do
         if ($existingMarkDownFileHash.Hash -ieq $newMarkDownFileHash.Hash) {
