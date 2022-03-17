@@ -104,12 +104,12 @@ foreach ($markdownFile in $markdownFiles) {
         $existingMarkDownFileHash = Get-FileHash -Path $existingMarkdownTempFile
         $newMarkDownFileHash = Get-FileHash -Path $markdownFilePath
 
-        Write-Verbose "Existing $markdownFilename FileHash: $($existingMarkDownFileHash.Hash)"
-        Write-Verbose "New file $markdownFilename FileHash: $($newMarkDownFileHash.Hash)"
+        Write-Verbose "Existing '$markdownFilename' FileHash: $($existingMarkDownFileHash.Hash)"
+        Write-Verbose "New file '$markdownFilename' FileHash: $($newMarkDownFileHash.Hash)"
         
         # 3.2.4 Compare hashes and continue if nothing to do
         if ($existingMarkDownFileHash.Hash -ieq $newMarkDownFileHash.Hash) {
-            Write-Host "New content file hash matches existing content file hash. Nothing to update"
+            Write-Host "New content file hash for '$markdownFilename' matches existing content file hash. Nothing to update"
             continue;
         }
         else {
@@ -121,7 +121,7 @@ foreach ($markdownFile in $markdownFiles) {
 
 # 4. Check for any file changes
 if ($ChangesToPublish -eq $False) {
-    Write-Host "All content file hashes match existing content file hashes. Nothing to update"
+    Write-Host "All content file hashes match existing content file hashes. Completing"
 }
 else {
 
