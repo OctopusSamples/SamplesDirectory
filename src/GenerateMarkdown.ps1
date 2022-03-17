@@ -1,40 +1,57 @@
 param (
     [string]$CatalogItemsFilePath,
-    [string]$MarkDownFilePath
+    [string]$MarkdownTargetFolder
 )
 
 $ErrorActionPreference = "Stop"
+
+if (!(Test-Path $MarkdownTargetFolder)) {
+    Write-Host "Creating directory $MarkdownTargetFolder"
+    New-Item -ItemType Directory -Path $MarkdownTargetFolder -Force
+}
+
 $CatalogItemsContent = Get-Content $CatalogItemsFilePath | ConvertFrom-Json
 $FeatureGroups = $CatalogItemsContent | Group-Object -Property Feature | Sort-Object -Property Name
-$MarkDownContent = @()
+$MarkdownContent = @()
 
 foreach ($FeatureGroup in $FeatureGroups) {
     $FeatureName = $FeatureGroup.Name
-    
-    $MarkDownContent += "### $($FeatureName)"
+    $FeatureFileName = "samples-$($FeatureName.ToLowerInvariant() -Replace " ","-")-feature-list.include.md"
+    $MarkdownFilePath = ([System.IO.Path]::Combine($MarkdownTargetFolder, "$FeatureFileName"))
+    New-Item -Path $MarkdownFilePath -ItemType File -Force
+    $MarkdownContent = ""
     $SpaceGroups = $FeatureGroup.Group | Group-Object -Property SpaceName
-
+    $counter = 1
     foreach ($SpaceGroup in $SpaceGroups) {
         $SpaceName = $SpaceGroup.Name
-        $MarkDownContent += "
-**$($SpaceName)**"
+        if ($counter -eq 1) {
+            $MarkdownContent += "**$($SpaceName)**
+            "
+        }
+        else {
+            $MarkdownContent += "
+
+**$($SpaceName)**
+"
+        }
+        
         $Projects = $SpaceGroup.Group | Sort-Object -Property ProjectName
         foreach ($Project in $Projects) {
             $ProjectName = $Project.ProjectName
             $ProjectDescription = $Project.ProjectDescription
             $ProjectUrl = $Project.ProjectLink
-            $ProjectMarkdown = "  - <a href=`"$($ProjectUrl)`" target=`"_blank`">$($ProjectName)</a>"
+            $ProjectMarkdown = "
+- <a href=`"$($ProjectUrl)`" target=`"_blank`">$($ProjectName)</a>"
             
             if (![string]::IsNullOrWhitespace($ProjectDescription)) {
                 # Flatten new lines
                 $ProjectDescription = (($ProjectDescription -Replace "`n", " ") -Replace "  ", " ").Trim()
-                $ProjectMarkdown += ": *$ProjectDescription*
-                "
+                $ProjectMarkdown += ": *$ProjectDescription*"
             }
-            $MarkDownContent += $ProjectMarkdown
+            $MarkdownContent += $ProjectMarkdown
         }
+        $counter++
     }
+    Write-Host "Setting markdown content for $Feature in $MarkdownFilePath"
+    Set-Content -Path $MarkdownFilePath -Value $MarkdownContent -Force
 }
-
-New-Item -Path $MarkDownFilePath -ItemType File -Force
-Set-Content -Path $MarkDownFilePath -Value $MarkDownContent -Force
