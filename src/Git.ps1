@@ -80,19 +80,20 @@ function Publish-Changes {
         [string]$useremail,
         [string]$accessToken,
         [string]$branchName,
-        [string]$fileName,
+        [string[]]$fileNames,
         [bool]$WhatIf
     )
     $prevLocation = Get-Location
 
+    $joinedFilenames = $fileNames | Join-String -Separator ','
     if ($WhatIf -eq $True) {
-        Write-OctopusHighlight "WhatIf: Would have added and committed '$fileName' to branch $branchName."
+        Write-OctopusHighlight "WhatIf: Would have added and committed '$joinedFilenames' to branch $branchName."
     }
     else {
         try {
             Write-Host "##octopus[stderr-progress]"
 
-            Write-Host "Publishing changes to file $fileName to $repoFullName in branch $branchName."
+            Write-Host "Publishing changes to files '$joinedFilenames' to $repoFullName in branch $branchName."
             Set-Location $checkoutFolder
 
             Write-Verbose "Running git config for user.email"
@@ -107,22 +108,27 @@ function Publish-Changes {
                 throw "Error running git config for user.name"       
             }
 
-            Write-Verbose "Adding file $fileName to branch $branchName"
-            & git add $fileName
-            if ($LASTEXITCODE -ne 0) {
-                throw "Error adding $fileName to branch: $branchName"       
+            
+            foreach ($fileName in $fileNames) {
+                Write-Verbose "Adding file $fileName to branch $branchName"
+                & git add $fileName
+                if ($LASTEXITCODE -ne 0) {
+                    throw "Error adding $fileName to branch: $branchName"       
+                }
+
+                
             }
         
-            Write-Verbose "Committing file $fileName"
-            & git commit -m "Updating samples-instance-features-list.include.md with new directory contents"
+            Write-Verbose "Committing files '$joinedFilenames"
+            & git commit -m "Updating multiple files with new directory contents"
             if ($LASTEXITCODE -ne 0) {
-                throw "Error committing changes for $fileName to branch: $branchName"
+                throw "Error committing changes for '$joinedFilenames' to branch: $branchName"
             }
 
-            Write-Verbose "Pushing file $fileName changes to $branchName"
+            Write-Verbose "Pushing file changes to $branchName"
             & git push -u "https://$($username):$($accessToken)@github.com/$($repoFullName).git" $branchName
             if ($LASTEXITCODE -ne 0) {
-                throw "Error pushing changes for $fileName to $repoFullName in $branchName"
+                throw "Error pushing changes for '$joinedFilenames' to $repoFullName in $branchName"
             }
         }
         finally {

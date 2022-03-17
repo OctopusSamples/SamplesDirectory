@@ -74,7 +74,7 @@ $docsRepoFolderPath = ([System.IO.Path]::Combine($tempCheckoutFolder, "docs"))
 
 New-ClonedRepo -checkoutFolder $tempCheckoutFolder -repoFullName $docsRepoFullName -username $GitHubUsername -accessToken $GitHubAccessToken
 
-$ChangesToPublish = $False
+$fileNames = @()
 
 # 2. Get each markdown file(s) content
 foreach ($markdownFile in $markdownFiles) {
@@ -89,7 +89,7 @@ foreach ($markdownFile in $markdownFiles) {
         
         # 3.1 Copy the contents of the new file to designated location
         Set-Content -Path $existingMarkDownFilePath -Value $markdownContent
-        $ChangesToPublish = $True
+        $fileNames += $markdownFilename
     }
     else {
         # 3.2.1 Check to see if existing file contents are the same as new. If they are, nothing to do for this file
@@ -114,27 +114,34 @@ foreach ($markdownFile in $markdownFiles) {
         }
         else {
             Set-Content -Path $existingMarkDownFilePath -Value $markdownContent
-            $ChangesToPublish = $True
+            
+            $fileNames += $markdownFilename
+
         }
     }
 }
 
 # 4. Check for any file changes
-if ($ChangesToPublish -eq $False) {
+if ($fileNames.Length -eq 0) {
     Write-Host "All content file hashes match existing content file hashes. Completing"
 }
 else {
+
+    $gitFileNames = @($fileNames | ForEach-Object {"docs/shared-content/samples/$_"})
 
     Write-Host "WhatIf set to $WhatIf."
 
     # 5. Create new branch and commit file
     New-Branch -checkoutFolder $docsRepoFolderPath -branchName $branchName -whatIf $WhatIf
 
-    Publish-Changes -checkoutFolder $docsRepoFolderPath -repoFullName $docsRepoFullName -username $GitHubUsername -useremail $GitHubUserEmail -accessToken $GitHubAccessToken -branchName $branchName -fileName "docs/shared-content/samples/samples-instance-features-list.include.md" -whatIf $WhatIf
-
+    Publish-Changes -checkoutFolder $docsRepoFolderPath -repoFullName $docsRepoFullName -username $GitHubUsername -useremail $GitHubUserEmail -accessToken $GitHubAccessToken -branchName $branchName -fileNames $gitFileNames -whatIf $WhatIf
+    
     # 6. Create PR in GitHub on docs repo
     $pullRequestBody = "An automated update of the features directory list for the Customer Solutions Team samples instance, https://samples.octopus.app.`n`n
-Created by the SamplesDirectory process, run from https://samples-admin.octopus.app"
+Created by the SamplesDirectory process, run from https://samples-admin.octopus.app`n`nFiles Changed:`n`n"
+    foreach ($fileName in $fileNames) {
+        $pullRequestBody += "- $fileName`n"
+    }
     New-PullRequest -checkoutFolder $docsRepoFolderPath -repoFullName $docsRepoFullName -Title "Updating features directory for samples instance" -Body $pullRequestBody -Head $branchName -Base $docsDefaultBranch -whatIf $WhatIf
 }
 
