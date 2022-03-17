@@ -81,7 +81,7 @@ foreach ($markdownFile in $markdownFiles) {
     $markdownFilename = $markdownFile.Name
     $markdownFilePath = $markdownFile.FullName
     $markdownContent = Get-Content $markdownFilePath
-    $existingMarkdownFilePath = ([System.IO.Path]::Combine($docsRepoFolderPath, "docs", "shared-content" , "samples", $markdownFile))
+    $existingMarkdownFilePath = ([System.IO.Path]::Combine($docsRepoFolderPath, "docs", "shared-content" , "samples", $markdownFilename))
 
     # 3. Does existing file exist?
     if (!(Test-Path -Path $existingMarkDownFilePath)) {

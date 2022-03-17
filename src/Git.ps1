@@ -85,7 +85,7 @@ function Publish-Changes {
     )
     $prevLocation = Get-Location
 
-    $joinedFilenames = $fileNames | Join-String -Separator ','
+    $joinedFilenames = $fileNames | Join-String -Separator ', '
     if ($WhatIf -eq $True) {
         Write-OctopusHighlight "WhatIf: Would have added and committed '$joinedFilenames' to branch $branchName."
     }
