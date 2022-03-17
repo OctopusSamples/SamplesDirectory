@@ -85,7 +85,7 @@ foreach ($markdownFile in $markdownFiles) {
 
     # 3. Does existing file exist?
     if (!(Test-Path -Path $existingMarkDownFilePath)) {
-        Write-Host "No file exists at: $existingMarkDownFilePath. This most-likely indicates it's a new file"
+        Write-Host "No existing file exists for $markdownFilename. This most-likely indicates it's a new file"
         
         # 3.1 Copy the contents of the new file to designated location
         Set-Content -Path $existingMarkDownFilePath -Value $markdownContent
