@@ -27,6 +27,15 @@ function Get-FeatureItem {
         $project
     )
     
+    switch ($source) {
+        "runbookprocess" {
+            $sourceLink = $octopusData.octopusUrl + $project.Links.Web + "/runbooks"
+        }
+        default {
+            $sourceLink = $octopusData.octopusUrl + $project.Links.Web
+        }
+    }
+    
     $item = [PSCustomObject]@{
         Feature            = $feature;
         Source             = $source;
@@ -35,7 +44,7 @@ function Get-FeatureItem {
         ProjectId          = $project.Id;
         ProjectName        = $project.Name;
         ProjectDescription = $project.Description;
-        ProjectLink        = $octopusData.octopusUrl + $project.Links.Web
+        SourceLink         = $sourceLink
     }
     return $item
 }
