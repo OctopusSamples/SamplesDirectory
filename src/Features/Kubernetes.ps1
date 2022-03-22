@@ -20,12 +20,13 @@ function Find-KubernetesFeatureInStep {
     param(
         [Object[]]
         $items,
+        $source,
         $step,
         $octopusData,
         $project
     )
-    $itemToCatalog = Get-FeatureItem -feature "Kubernetes" -octopusData $octopusData -project $project
-    $haveMatchingItem = Get-FirstOrDefault -items $items -delegate ({ $args[0].Feature -eq $itemToCatalog.Feature -and $args[0].ProjectId -eq $itemToCatalog.ProjectId })
+    $itemToCatalog = Get-FeatureItem -feature "Kubernetes" -source $source -octopusData $octopusData -project $project
+    $haveMatchingItem = Get-FirstOrDefault -items $items -delegate ({ $args[0].Feature -eq $itemToCatalog.Feature -and $args[0].Source -eq $itemToCatalog.Source -and $args[0].ProjectId -eq $itemToCatalog.ProjectId })
 
     if ($null -ne $haveMatchingItem) {
         return $items;

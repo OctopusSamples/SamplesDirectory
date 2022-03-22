@@ -16,12 +16,13 @@ function Find-TerraformFeatureInStep {
     param(
         [Object[]]
         $items,
+        $source,
         $step,
         $octopusData,
         $project
     )
-    $itemToCatalog = Get-FeatureItem -feature "Terraform" -octopusData $octopusData -project $project
-    $haveMatchingItem = Get-FirstOrDefault -items $items -delegate ({ $args[0].Feature -eq $itemToCatalog.Feature -and $args[0].ProjectId -eq $itemToCatalog.ProjectId })
+    $itemToCatalog = Get-FeatureItem -feature "Terraform" -source $source -octopusData $octopusData -project $project
+    $haveMatchingItem = Get-FirstOrDefault -items $items -delegate ({ $args[0].Feature -eq $itemToCatalog.Feature -and $args[0].Source -eq $itemToCatalog.Source -and $args[0].ProjectId -eq $itemToCatalog.ProjectId })
 
     if ($null -ne $haveMatchingItem) {
         return $items;

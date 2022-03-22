@@ -38,17 +38,18 @@ foreach ($space in $SpaceList) {
     $projects = $octopusData.ProjectList
     foreach ($project in $projects) {
         Write-OctopusSuccess "Checking project '$($project.Name)' for features"
-        
+    
         # Check each project deployment process.
         $deploymentProcess = Get-OctopusProjectDeploymentProcess -project $project -octopusData $octopusData
+        $source = Get-Source -ownerId $deploymentProcess.Id
         foreach ($deploymentstep in $deploymentProcess.Steps) {
-            $items = @(Find-AwsFeatureInStep -items $items -step $deploymentstep -octopusData $octopusData -project $project)
-            $items = @(Find-AzureFeatureInStep -items $items -step $deploymentstep -octopusData $octopusData -project $project)
-            $items = @(Find-GoogleCloudFeatureInStep -items $items -step $deploymentstep -octopusData $octopusData -project $project)
-            $items = @(Find-IISFeatureInStep -items $items -step $deploymentstep -octopusData $octopusData -project $project)
-            $items = @(Find-JavaFeatureInStep -items $items -step $deploymentstep -octopusData $octopusData -project $project)
-            $items = @(Find-KubernetesFeatureInStep -items $items -step $deploymentstep -octopusData $octopusData -project $project)
-            $items = @(Find-TerraformFeatureInStep -items $items -step $deploymentstep -octopusData $octopusData -project $project)
+            $items = @(Find-AwsFeatureInStep -items $items -source $source -step $deploymentstep -octopusData $octopusData -project $project)
+            $items = @(Find-AzureFeatureInStep -items $items -source $source -step $deploymentstep -octopusData $octopusData -project $project)
+            $items = @(Find-GoogleCloudFeatureInStep -items $items -source $source -step $deploymentstep -octopusData $octopusData -project $project)
+            $items = @(Find-IISFeatureInStep -items $items -source $source -step $deploymentstep -octopusData $octopusData -project $project)
+            $items = @(Find-JavaFeatureInStep -items $items -source $source -step $deploymentstep -octopusData $octopusData -project $project)
+            $items = @(Find-KubernetesFeatureInStep -items $items -source $source -step $deploymentstep -octopusData $octopusData -project $project)
+            $items = @(Find-TerraformFeatureInStep -items $items -source $source -step $deploymentstep -octopusData $octopusData -project $project)
         }
 
         # Check runbook processes
@@ -56,14 +57,15 @@ foreach ($space in $SpaceList) {
         $projectRunbooks = Get-OctopusProjectRunbookList -project $project -octopusData $octopusData
         foreach ($runbook in $projectRunbooks) {
             $runbookProcess = Get-OctopusRunbookProcess -runbook $runbook -octopusData $octopusData
+            $source = Get-Source -ownerId $runbookProcess.Id
             foreach ($runbookStep in $runbookProcess.Steps) {
-                $items = @(Find-AwsFeatureInStep -items $items -step $runbookStep -octopusData $octopusData -project $project)
-                $items = @(Find-AzureFeatureInStep -items $items -step $runbookStep -octopusData $octopusData -project $project)
-                $items = @(Find-GoogleCloudFeatureInStep -items $items -step $runbookStep -octopusData $octopusData -project $project)
-                $items = @(Find-IISFeatureInStep -items $items -step $runbookStep -octopusData $octopusData -project $project)
-                $items = @(Find-JavaFeatureInStep -items $items -step $runbookStep -octopusData $octopusData -project $project)
-                $items = @(Find-KubernetesFeatureInStep -items $items -step $runbookStep -octopusData $octopusData -project $project)
-                $items = @(Find-TerraformFeatureInStep -items $items -step $runbookStep -octopusData $octopusData -project $project)
+                $items = @(Find-AwsFeatureInStep -items $items -source $source -step $runbookStep -octopusData $octopusData -project $project)
+                $items = @(Find-AzureFeatureInStep -items $items -source $source -step $runbookStep -octopusData $octopusData -project $project)
+                $items = @(Find-GoogleCloudFeatureInStep -items $items -source $source -step $runbookStep -octopusData $octopusData -project $project)
+                $items = @(Find-IISFeatureInStep -items $items -source $source -step $runbookStep -octopusData $octopusData -project $project)
+                $items = @(Find-JavaFeatureInStep -items $items -source $source -step $runbookStep -octopusData $octopusData -project $project)
+                $items = @(Find-KubernetesFeatureInStep -items $items -source $source -step $runbookStep -octopusData $octopusData -project $project)
+                $items = @(Find-TerraformFeatureInStep -items $items -source $source -step $runbookStep -octopusData $octopusData -project $project)
             }
         }
     } 

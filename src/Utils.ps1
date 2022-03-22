@@ -8,15 +8,28 @@ function Get-FirstOrDefault {
     return [Linq.Enumerable]::FirstOrDefault($items, $delegate);
 }
 
+function Get-Source {
+    param(
+        $ownerId       
+    )
+    $source = ""
+    if (![string]::IsNullOrWhitespace($ownerId)) {
+        $source = ($ownerId -Split "-")[0].ToLowerInvariant()
+    } 
+    return $source;
+}
+
 function Get-FeatureItem {
     param(
         $feature,
+        $source,
         $octopusData,
         $project
     )
     
     $item = [PSCustomObject]@{
         Feature            = $feature;
+        Source             = $source;
         SpaceId            = $octopusData.SpaceId;
         SpaceName          = $octopusData.SpaceName;
         ProjectId          = $project.Id;
