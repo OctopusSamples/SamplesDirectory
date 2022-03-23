@@ -8,14 +8,34 @@ function Get-FirstOrDefault {
     return [Linq.Enumerable]::FirstOrDefault($items, $delegate);
 }
 
-function Get-Source {
+function Get-SourceForDeploymentProcess {
     param(
-        $ownerId       
+        $project,
+        $deploymentProcess
     )
-    $source = ""
-    if (![string]::IsNullOrWhitespace($ownerId)) {
-        $source = ($ownerId -Split "-")[0].ToLowerInvariant()
-    } 
+    $source = [PSCustomObject]@{
+        Id          = $deploymentProcess.Id;
+        Type        = ($deploymentProcess.Id -Split "-")[0].ToLowerInvariant();
+        Name        = $null;
+        Description = $project.Description;
+        Link        = $octopusData.octopusUrl + $project.Links.Web + "/deployments/process";
+    }
+    return $source;
+}
+
+function Get-SourceForRunbookProcess {
+    param(
+        $project,
+        $runbook,
+        $runbookProcess
+    )
+    $source = [PSCustomObject]@{
+        Id          = $runbookProcess.Id
+        Type        = ($runbookProcess.Id -Split "-")[0].ToLowerInvariant();
+        Name        = $runbook.Name
+        Description = $runbook.Description
+        Link        = $octopusData.octopusUrl + $project.Links.Web + "/operations/runbooks/$($runbook.Id)/process/$($runbookProcess.Id)"
+    }
     return $source;
 }
 
@@ -26,25 +46,19 @@ function Get-FeatureItem {
         $octopusData,
         $project
     )
-    
-    switch ($source) {
-        "runbookprocess" {
-            $sourceLink = $octopusData.octopusUrl + $project.Links.Web + "/runbooks"
-        }
-        default {
-            $sourceLink = $octopusData.octopusUrl + $project.Links.Web
-        }
-    }
-    
+        
     $item = [PSCustomObject]@{
-        Feature            = $feature;
-        Source             = $source;
-        SpaceId            = $octopusData.SpaceId;
-        SpaceName          = $octopusData.SpaceName;
-        ProjectId          = $project.Id;
-        ProjectName        = $project.Name;
-        ProjectDescription = $project.Description;
-        SourceLink         = $sourceLink
+        Feature           = $feature;
+        SpaceId           = $octopusData.SpaceId;
+        SpaceName         = $octopusData.SpaceName;
+        ProjectId         = $project.Id;
+        ProjectName       = $project.Name;
+        ProjectLink       = $octopusData.octopusUrl + $project.Links.Web
+        SourceId          = $source.Id;
+        SourceType        = $source.Type;
+        SourceName        = $source.Name;
+        SourceDescription = $source.Description;
+        SourceLink        = $source.Link;
     }
     return $item
 }

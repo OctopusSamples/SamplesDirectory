@@ -20,7 +20,7 @@ function Find-IISFeatureInStep {
         $project
     )
     $itemToCatalog = Get-FeatureItem -feature "IIS" -source $source -octopusData $octopusData -project $project
-    $haveMatchingItem = Get-FirstOrDefault -items $items -delegate ({ $args[0].Feature -eq $itemToCatalog.Feature -and $args[0].Source -eq $itemToCatalog.Source -and $args[0].ProjectId -eq $itemToCatalog.ProjectId })
+    $haveMatchingItem = Get-FirstOrDefault -items $items -delegate ({ $args[0].Feature -ieq $itemToCatalog.Feature -and $args[0].ProjectId -ieq $itemToCatalog.ProjectId -and $args[0].SourceId -ieq $itemToCatalog.SourceId })
 
     if ($null -ne $haveMatchingItem) {
         return $items;
@@ -28,19 +28,19 @@ function Find-IISFeatureInStep {
 
     # Deploy to IIS
     if ($step.Actions[0].ActionType -eq "Octopus.IIS") { 
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the built-in 'Deploy to IIS' step." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the built-in 'Deploy to IIS' step in '$($source.Id)'." 
         $items += $itemToCatalog
         return $items;
     }
     # Check for package step with enabled feature
     if (Test-PropertyExistsAndContainsValue -inputObject $step.Actions[0].Properties -name "Octopus.Action.EnabledFeatures" - value "Octopus.Features.IISWebSite") {
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has a package step with the IIS feature enabled." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has a package step with the IIS feature enabled in '$($source.Id)'." 
         $items += $itemToCatalog
         return $items;
     }
     # Check deployment step for any step template containing the name 'IIS'
     if (Test-StepTemplateNameContainsValue -step $step -name "IIS" -octopusData $octopusData) {
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has a step template with the word 'IIS' in it." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has a step template with the word 'IIS' in it, in '$($source.Id)'." 
         $items += $itemToCatalog
         return $items;
     }

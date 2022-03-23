@@ -11,13 +11,12 @@ if (!(Test-Path $MarkdownTargetFolder)) {
 }
 
 $CatalogItemsContent = Get-Content $CatalogItemsFilePath | ConvertFrom-Json
-$SourceGroups = $CatalogItemsContent | Group-Object -Property Source | Sort-Object -Property Name
+$SourceGroups = $CatalogItemsContent | Group-Object -Property SourceType | Sort-Object -Property Name
 
 foreach ($source in $SourceGroups) {
     $sourceName = $source.Name -Replace "process", ""
 
     $FeatureGroups = $source.Group | Group-Object -Property Feature | Sort-Object -Property Name
-    $MarkdownContent = @()
     
     foreach ($feature in $FeatureGroups) {
         $FeatureName = $feature.Name
@@ -25,6 +24,7 @@ foreach ($source in $SourceGroups) {
         $MarkdownFilePath = ([System.IO.Path]::Combine($MarkdownTargetFolder, "$FeatureFileName"))
         New-Item -Path $MarkdownFilePath -ItemType File -Force
         $MarkdownContent = ""
+    
         $SpaceGroups = $feature.Group | Group-Object -Property SpaceName
         $counter = 1
         foreach ($SpaceGroup in $SpaceGroups) {
@@ -40,21 +40,52 @@ foreach ($source in $SourceGroups) {
 "
             }
             
-            $Projects = $SpaceGroup.Group | Sort-Object -Property ProjectName
-            foreach ($Project in $Projects) {
-                $ProjectName = $Project.ProjectName
-                $ProjectDescription = $Project.ProjectDescription
-                $ProjectUrl = $Project.SourceLink
-                $ProjectMarkdown = "
-- <a href=`"$($ProjectUrl)`" target=`"_blank`">$($ProjectName)</a>"
-                
-                if (![string]::IsNullOrWhitespace($ProjectDescription)) {
-                    # Flatten new lines
-                    $ProjectDescription = (($ProjectDescription -Replace "`n", " ") -Replace "  ", " ").Trim()
-                    $ProjectMarkdown += ": *$ProjectDescription*"
+            switch ($sourceName) {
+                "runbook" {
+                    $Projects = $SpaceGroup.Group | Group-Object -Property ProjectName | Sort-Object -Property Name
+                    foreach ($project in $Projects) {
+                        $ProjectName = $Project.Name
+                        
+                        $MarkdownContent += "
+- $($ProjectName)"
+                        $runbooks = $project.Group | Sort-Object -Property SourceName
+                        foreach ($runbook in $runbooks) {
+                            $RunbookName = $runbook.SourceName
+                            $SourceDescription = $runbook.SourceDescription
+                            $SourceLink = $runbook.SourceLink
+                            $runbookMarkdown = "
+   - <a href=`"$($SourceLink)`" target=`"_blank`">$($RunbookName)</a>"
+                            if (![string]::IsNullOrWhitespace($SourceDescription)) {
+                                $SourceDescription = ($SourceDescription -Replace "  ", " ").Trim()
+                                # Attempt to make bullet points better
+                                $SourceDescription = ($SourceDescription -Replace "`n- ", "`n      - ").Trim()
+                                $runbookMarkdown += ": <i>$SourceDescription</i>"
+                            }
+                            $MarkdownContent += $runbookMarkdown
+                        }
+                    }
                 }
-                $MarkdownContent += $ProjectMarkdown
+                "deployment" {
+                    $Projects = $SpaceGroup.Group | Sort-Object -Property Name
+                    
+                    foreach ($project in $Projects) {
+                        $ProjectName = $Project.ProjectName
+                        $SourceDescription = $Project.SourceDescription
+                        $SourceLink = $Project.SourceLink
+                        $markdown = "
+- <a href=`"$($SourceLink)`" target=`"_blank`">$($ProjectName)</a>"
+                        if (![string]::IsNullOrWhitespace($SourceDescription)) {
+                            $SourceDescription = (($SourceDescription -Replace "`n", " ") -Replace "  ", " ").Trim()
+                            $markdown += ": <i>$SourceDescription</i>"
+                        }
+                        $MarkdownContent += $markdown
+                    }
+                }
+                default {
+                    throw "Unknown '$sourceName' provided to generate markdown files!"
+                }
             }
+            
             $counter++
         }
         Write-Host "Setting markdown content for $Feature in $MarkdownFilePath"

@@ -70,7 +70,7 @@ if (![string]::IsNullOrWhitespace($ExcludeProjects)) {
 }
 
 if ($ExcludedProjects.Count -gt 0) {
-    Write-Host "Projects to exclude: $($ExcludedProjects.Count)"
+    Write-Host "Projects Exclusion criteria: $($ExcludedProjects.Count)"
 }
 
 $SpaceList = Get-OctopusSpaceList -octopusUrl $OctopusUrl -octopusApiKey $OctopusApiKey
@@ -89,7 +89,7 @@ foreach ($space in $SpaceList) {
     
             # Check each project deployment process.
             $deploymentProcess = Get-OctopusProjectDeploymentProcess -project $project -octopusData $octopusData
-            $source = Get-Source -ownerId $deploymentProcess.Id
+            $source = Get-SourceForDeploymentProcess -project $project -deploymentProcess $deploymentProcess
             foreach ($deploymentstep in $deploymentProcess.Steps) {
                 $items = @(Find-AwsFeatureInStep -items $items -source $source -step $deploymentstep -octopusData $octopusData -project $project)
                 $items = @(Find-AzureFeatureInStep -items $items -source $source -step $deploymentstep -octopusData $octopusData -project $project)
@@ -105,7 +105,7 @@ foreach ($space in $SpaceList) {
             $projectRunbooks = Get-OctopusProjectRunbookList -project $project -octopusData $octopusData
             foreach ($runbook in $projectRunbooks) {
                 $runbookProcess = Get-OctopusRunbookProcess -runbook $runbook -octopusData $octopusData
-                $source = Get-Source -ownerId $runbookProcess.Id
+                $source = Get-SourceForRunbookProcess -project $project -runbook $runbook -runbookProcess $runbookProcess
                 foreach ($runbookStep in $runbookProcess.Steps) {
                     $items = @(Find-AwsFeatureInStep -items $items -source $source -step $runbookStep -octopusData $octopusData -project $project)
                     $items = @(Find-AzureFeatureInStep -items $items -source $source -step $runbookStep -octopusData $octopusData -project $project)
@@ -136,6 +136,5 @@ If ($OutputResults -eq $True) {
     $items | Format-List  
 }
 else {
-    $items | ConvertTo-Json | Out-File -FilePath "/home/markh/Downloads/SamplesInstanceCatalogItems.json" -Force
     return $items
 }

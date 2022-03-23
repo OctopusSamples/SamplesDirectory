@@ -22,7 +22,7 @@ function Find-TerraformFeatureInStep {
         $project
     )
     $itemToCatalog = Get-FeatureItem -feature "Terraform" -source $source -octopusData $octopusData -project $project
-    $haveMatchingItem = Get-FirstOrDefault -items $items -delegate ({ $args[0].Feature -eq $itemToCatalog.Feature -and $args[0].Source -eq $itemToCatalog.Source -and $args[0].ProjectId -eq $itemToCatalog.ProjectId })
+    $haveMatchingItem = Get-FirstOrDefault -items $items -delegate ({ $args[0].Feature -ieq $itemToCatalog.Feature -and $args[0].ProjectId -ieq $itemToCatalog.ProjectId -and $args[0].SourceId -ieq $itemToCatalog.SourceId })
 
     if ($null -ne $haveMatchingItem) {
         return $items;
@@ -30,32 +30,32 @@ function Find-TerraformFeatureInStep {
 
     # Apply a Terraform template
     if ($step.Actions[0].ActionType -eq "Octopus.TerraformApply") { 
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the built-in 'Apply a Terraform template' step." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the built-in 'Apply a Terraform template' step in '$($source.Id)'." 
         $items += $itemToCatalog
         return $items;
     }
     # Destroy terraform resources
     if ($step.Actions[0].ActionType -eq "Octopus.TerraformDestroy") { 
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the built-in 'Destroy terraform resources' step." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the built-in 'Destroy terraform resources' step in '$($source.Id)'." 
         $items += $itemToCatalog
         return $items;
     }
     # Plan to apply a Terraform template
     if ($step.Actions[0].ActionType -eq "Octopus.TerraformPlan") { 
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the built-in 'Plan to apply a Terraform template' step." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the built-in 'Plan to apply a Terraform template' step in '$($source.Id)'." 
         $items += $itemToCatalog
         return $items;
     }
     # Plan a Terraform destroy
     if ($step.Actions[0].ActionType -eq "Octopus.TerraformPlanDestroy") { 
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the built-in 'Plan a Terraform destroy' step." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the built-in 'Plan a Terraform destroy' step in '$($source.Id)'." 
         $items += $itemToCatalog
         return $items;
     }
 
     # Check deployment step for any step template containing the name 'Terraform'
     if (Test-StepTemplateNameContainsValue -step $step -name "Terraform" -octopusData $octopusData) {
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has a step template with the word 'Terraform' in it." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has a step template with the word 'Terraform' in it, in '$($source.Id)'." 
         $items += $itemToCatalog
         return $items;
     }

@@ -26,7 +26,7 @@ function Find-KubernetesFeatureInStep {
         $project
     )
     $itemToCatalog = Get-FeatureItem -feature "Kubernetes" -source $source -octopusData $octopusData -project $project
-    $haveMatchingItem = Get-FirstOrDefault -items $items -delegate ({ $args[0].Feature -eq $itemToCatalog.Feature -and $args[0].Source -eq $itemToCatalog.Source -and $args[0].ProjectId -eq $itemToCatalog.ProjectId })
+    $haveMatchingItem = Get-FirstOrDefault -items $items -delegate ({ $args[0].Feature -ieq $itemToCatalog.Feature -and $args[0].ProjectId -ieq $itemToCatalog.ProjectId -and $args[0].SourceId -ieq $itemToCatalog.SourceId })
 
     if ($null -ne $haveMatchingItem) {
         return $items;
@@ -34,61 +34,61 @@ function Find-KubernetesFeatureInStep {
 
     # Deploy Kubernetes containers
     if ($step.Actions[0].ActionType -eq "Octopus.KubernetesDeployContainers") { 
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the 'Deploy Kubernetes containers' step." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the 'Deploy Kubernetes containers' step in '$($source.Id)'." 
         $items += $itemToCatalog
         return $items;
     }
     # Run a kubectl CLI Script
     if ($step.Actions[0].ActionType -eq "Octopus.KubernetesRunScript") { 
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the 'Run a kubectl CLI Script' step." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the 'Run a kubectl CLI Script' step in '$($source.Id)'." 
         $items += $itemToCatalog
         return $items;
     }
     # Deploy raw Kubernetes YAML
     if ($step.Actions[0].ActionType -eq "Octopus.KubernetesDeployRawYaml") { 
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the 'Deploy raw Kubernetes YAML' step." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the 'Deploy raw Kubernetes YAML' step in '$($source.Id)'." 
         $items += $itemToCatalog
         return $items;
     }
     # Deploy Kubernetes ingress resource
     if ($step.Actions[0].ActionType -eq "Octopus.KubernetesDeployIngress") { 
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the 'Deploy Kubernetes ingress resource' step." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the 'Deploy Kubernetes ingress resource' step in '$($source.Id)'." 
         $items += $itemToCatalog
         return $items;
     }
     # Deploy Kubernetes secret resource
     if ($step.Actions[0].ActionType -eq "Octopus.KubernetesDeploySecret") { 
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the 'Deploy Kubernetes secret resource' step." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the 'Deploy Kubernetes secret resource' step in '$($source.Id)'." 
         $items += $itemToCatalog
         return $items;
     }
     # Deploy Kubernetes service resource
     if ($step.Actions[0].ActionType -eq "Octopus.KubernetesDeployService") { 
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the 'Deploy Kubernetes service resource' step." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the 'Deploy Kubernetes service resource' step in '$($source.Id)'." 
         $items += $itemToCatalog
         return $items;
     }
     # Deploy Kubernetes config map resource
     if ($step.Actions[0].ActionType -eq "Octopus.KubernetesDeployConfigMap") { 
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the 'Deploy Kubernetes config map resource' step." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the 'Deploy Kubernetes config map resource' step in '$($source.Id)'." 
         $items += $itemToCatalog
         return $items;
     }
     # Upgrade a Helm Chart
     if ($step.Actions[0].ActionType -eq "Octopus.HelmChartUpgrade") { 
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the 'Upgrade a Helm Chart' step." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the 'Upgrade a Helm Chart' step in '$($source.Id)'." 
         $items += $itemToCatalog
         return $items;
     }
     # Check step for any step template containing the name 'Kubernetes'
     if (Test-StepTemplateNameContainsValue -step $step -name "Kubernetes" -octopusData $octopusData) {
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has a step template with the word 'Kubernetes' in it." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has a step template with the word 'Kubernetes' in it, in '$($source.Id)'." 
         $items += $itemToCatalog
         return $items;
     }
     # Check step for any step template containing the name 'Helm'
     if (Test-StepTemplateNameContainsValue -step $step -name "Helm" -octopusData $octopusData) {
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has a step template with the word 'Helm' in it." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has a step template with the word 'Helm' in it, in '$($source.Id)'." 
         $items += $itemToCatalog
         return $items;
     }
