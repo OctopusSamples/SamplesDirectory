@@ -57,8 +57,9 @@ foreach ($source in $SourceGroups) {
    - <a href=`"$($SourceLink)`" target=`"_blank`">$($RunbookName)</a>"
                             if (![string]::IsNullOrWhitespace($SourceDescription)) {
                                 $SourceDescription = ($SourceDescription -Replace "  ", " ").Trim()
-                                # Attempt to make bullet points better
+                                # Attempt to make bullet points keep their formatting
                                 $SourceDescription = ($SourceDescription -Replace "`n- ", "`n      - ").Trim()
+                                $SourceDescription = ($SourceDescription -Replace "`n\* ", "`n      * ").Trim()
                                 $runbookMarkdown += ": <i>$SourceDescription</i>"
                             }
                             $MarkdownContent += $runbookMarkdown
