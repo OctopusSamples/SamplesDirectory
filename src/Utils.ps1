@@ -8,21 +8,57 @@ function Get-FirstOrDefault {
     return [Linq.Enumerable]::FirstOrDefault($items, $delegate);
 }
 
+function Get-SourceForDeploymentProcess {
+    param(
+        $project,
+        $deploymentProcess
+    )
+    $source = [PSCustomObject]@{
+        Id          = $deploymentProcess.Id;
+        Type        = ($deploymentProcess.Id -Split "-")[0].ToLowerInvariant();
+        Name        = $null;
+        Description = $project.Description;
+        Link        = $octopusData.octopusUrl + $project.Links.Web + "/deployments/process";
+    }
+    return $source;
+}
+
+function Get-SourceForRunbookProcess {
+    param(
+        $project,
+        $runbook,
+        $runbookProcess
+    )
+    $source = [PSCustomObject]@{
+        Id          = $runbookProcess.Id
+        Type        = ($runbookProcess.Id -Split "-")[0].ToLowerInvariant();
+        Name        = $runbook.Name
+        Description = $runbook.Description
+        Link        = $octopusData.octopusUrl + $project.Links.Web + "/operations/runbooks/$($runbook.Id)/process/$($runbookProcess.Id)"
+    }
+    return $source;
+}
+
 function Get-FeatureItem {
     param(
         $feature,
+        $source,
         $octopusData,
         $project
     )
-    
+        
     $item = [PSCustomObject]@{
-        Feature            = $feature;
-        SpaceId            = $octopusData.SpaceId;
-        SpaceName          = $octopusData.SpaceName;
-        ProjectId          = $project.Id;
-        ProjectName        = $project.Name;
-        ProjectDescription = $project.Description;
-        ProjectLink        = $octopusData.octopusUrl + $project.Links.Web
+        Feature           = $feature;
+        SpaceId           = $octopusData.SpaceId;
+        SpaceName         = $octopusData.SpaceName;
+        ProjectId         = $project.Id;
+        ProjectName       = $project.Name;
+        ProjectLink       = $octopusData.octopusUrl + $project.Links.Web
+        SourceId          = $source.Id;
+        SourceType        = $source.Type;
+        SourceName        = $source.Name;
+        SourceDescription = $source.Description;
+        SourceLink        = $source.Link;
     }
     return $item
 }

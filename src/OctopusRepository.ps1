@@ -210,7 +210,7 @@ function Get-OctopusProjectDeploymentProcess {
         if ($isVersionControlled -eq $True) {
             # Get default branch
             $branch = $project.PersistenceSettings.DefaultBranch
-            Write-OctopusWarning "Project '$($project.Name)' is version controlled, getting process from default branch: '$branch'"
+            Write-Verbose "Project '$($project.Name)' is version controlled, getting process from default branch: '$branch'"
             $deploymentProcessEndpoint = $deploymentProcessEndpoint.Replace("{gitRef}", $branch)
         }
         $deploymentProcess = Get-OctopusApi -EndPoint $deploymentProcessEndpoint -ApiKey $octopusData.OctopusApiKey -OctopusUrl $octopusData.OctopusUrl -SpaceId $null

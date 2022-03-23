@@ -14,12 +14,13 @@ function Find-GoogleCloudFeatureInStep {
     param(
         [Object[]]
         $items,
+        $source,
         $step,
         $octopusData,
         $project
     )
-    $itemToCatalog = Get-FeatureItem -feature "Google Cloud" -octopusData $octopusData -project $project
-    $haveMatchingItem = Get-FirstOrDefault -items $items -delegate ({ $args[0].Feature -eq $itemToCatalog.Feature -and $args[0].ProjectId -eq $itemToCatalog.ProjectId })
+    $itemToCatalog = Get-FeatureItem -feature "Google Cloud" -source $source -octopusData $octopusData -project $project
+    $haveMatchingItem = Get-FirstOrDefault -items $items -delegate ({ $args[0].Feature -ieq $itemToCatalog.Feature -and $args[0].ProjectId -ieq $itemToCatalog.ProjectId -and $args[0].SourceId -ieq $itemToCatalog.SourceId })
 
     if ($null -ne $haveMatchingItem) {
         return $items;
@@ -27,21 +28,21 @@ function Find-GoogleCloudFeatureInStep {
 
     # Run gcloud in a Script
     if ($step.Actions[0].ActionType -eq "Octopus.GoogleCloudScripting") { 
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the built-in 'Run gcloud in a Script' step." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the built-in 'Run gcloud in a Script' step in '$($source.Id)'." 
         $items += $itemToCatalog
         return $items;
     }
 
     # Check deployment step for any step template containing the name 'Google'
     if (Test-StepTemplateNameContainsValue -step $step -name "Google" -octopusData $octopusData) {
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has a step template with the word 'Google' in it." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has a step template with the word 'Google' in it, in '$($source.Id)'." 
         $items += $itemToCatalog
         return $items;
     }
 
     # Check deployment step for any step template containing the name 'GCP'
     if (Test-StepTemplateNameContainsValue -step $step -name "GCP" -octopusData $octopusData) {
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has a step template with the word 'GCP' in it." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has a step template with the word 'GCP' in it, in '$($source.Id)'." 
         $items += $itemToCatalog
         return $items;
     }

@@ -18,12 +18,13 @@ function Find-JavaFeatureInStep {
     param(
         [Object[]]
         $items, 
+        $source,
         $step,
         $octopusData,
         $project
     )
-    $itemToCatalog = Get-FeatureItem -feature "Java" -octopusData $octopusData -project $project
-    $haveMatchingItem = Get-FirstOrDefault -items $items -delegate ({ $args[0].Feature -eq $itemToCatalog.Feature -and $args[0].ProjectId -eq $itemToCatalog.ProjectId })
+    $itemToCatalog = Get-FeatureItem -feature "Java" -source $source -octopusData $octopusData -project $project
+    $haveMatchingItem = Get-FirstOrDefault -items $items -delegate ({ $args[0].Feature -ieq $itemToCatalog.Feature -and $args[0].ProjectId -ieq $itemToCatalog.ProjectId -and $args[0].SourceId -ieq $itemToCatalog.SourceId })
 
     if ($null -ne $haveMatchingItem) {
         return $items;
@@ -31,49 +32,49 @@ function Find-JavaFeatureInStep {
 
     # Deploy to Tomcat via Manager
     if ($step.Actions[0].ActionType -eq "Octopus.TomcatDeploy") { 
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the 'Deploy to Tomcat via Manager' step." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the 'Deploy to Tomcat via Manager' step in '$($source.Id)'." 
         $items += $itemToCatalog
         return $items;
     }
     # Deploy a certificate to Tomcat
     if ($step.Actions[0].ActionType -eq "Octopus.TomcatDeployCertificate") { 
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the 'Deploy a certificate to Tomcat' step." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the 'Deploy a certificate to Tomcat' step in '$($source.Id)'." 
         $items += $itemToCatalog
         return $items;
     }
     # Start/Stop App in Tomcat
     if ($step.Actions[0].ActionType -eq "Octopus.TomcatState") { 
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the 'Start/Stop App in Tomcat' step." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the 'Start/Stop App in Tomcat' step in '$($source.Id)'." 
         $items += $itemToCatalog
         return $items;
     }
     # Deploy to Wildfly or EAP
     if ($step.Actions[0].ActionType -eq "Octopus.WildFlyDeploy") { 
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the 'Deploy to Wildfly or EAP' step." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the 'Deploy to Wildfly or EAP' step in '$($source.Id)'." 
         $items += $itemToCatalog
         return $items;
     }
     # Configure certificate for Wildfly or EAP
     if ($step.Actions[0].ActionType -eq "Octopus.WildFlyCertificateDeploy") { 
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the 'Configure certificate for Wildfly or EAP' step." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the 'Configure certificate for Wildfly or EAP' step in '$($source.Id)'." 
         $items += $itemToCatalog
         return $items;
     }
     # Enable/Disable deployment in Wildfly or EAP
     if ($step.Actions[0].ActionType -eq "Octopus.WildFlyState") { 
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the 'Enable/Disable deployment in Wildfly or EAP' step." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the 'Enable/Disable deployment in Wildfly or EAP' step in '$($source.Id)'." 
         $items += $itemToCatalog
         return $items;
     }
     # Check step for any step template containing the name 'Tomcat'
     if (Test-StepTemplateNameContainsValue -step $step -name "Tomcat" -octopusData $octopusData) {
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has a step template with the word 'Tomcat' in it." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has a step template with the word 'Tomcat' in it, in '$($source.Id)'." 
         $items += $itemToCatalog
         return $items;
     }
     # Check step for any step template containing the name 'WildFly'
     if (Test-StepTemplateNameContainsValue -step $step -name "WildFly" -octopusData $octopusData) {
-        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has a step template with the word 'WildFly' in it." 
+        Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has a step template with the word 'WildFly' in it, in '$($source.Id)'." 
         $items += $itemToCatalog
         return $items;
     }
