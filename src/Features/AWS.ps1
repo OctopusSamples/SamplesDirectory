@@ -63,13 +63,13 @@ function Find-AwsFeatureInStep {
         return $items;
     }
     # Deploy Amazon ECS Service
-    if ($step.Actions[0].ActionType -eq "Octopus.aws-ecs") { 
+    if ($step.Actions[0].ActionType -eq "aws-ecs") { 
         Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the built-in 'Deploy Amazon ECS Service' step in '$($source.Id)'." 
         $items += $itemToCatalog
         return $items;
     }
     # Update Amazon ECS Service
-    if ($step.Actions[0].ActionType -eq "Octopus.aws-ecs-update-service") { 
+    if ($step.Actions[0].ActionType -eq "aws-ecs-update-service") { 
         Write-OctopusSuccess " - Project '$($project.Name)' ($($project.Id)) has the built-in 'Update Amazon ECS Service' step in '$($source.Id)'."
         $items += $itemToCatalog
         return $items;
