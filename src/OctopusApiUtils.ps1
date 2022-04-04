@@ -85,9 +85,7 @@ function Invoke-OctopusApi {
         else {
             Write-OctopusCritical $_.Exception
         }
-
-        Write-OctopusCritical "Exiting the Catalog processor."
-        Exit 1
+        throw $_
     }    
 }
 
