@@ -49,7 +49,7 @@ $OctopusUrl = $OctopusUrl.TrimEnd("/")
 [Object[]]$items = @()
 
 [PsCustomObject[]]$ExcludedProjects = @()
-
+Write-Host "Ignore Errors: $IgnoreErrors"
 Write-Host "Establishing any projects to exclude."
 if (![string]::IsNullOrWhitespace($ExcludeProjects)) {
     @(($ExcludeProjects -Split ",").Trim()) | ForEach-Object {
@@ -125,9 +125,8 @@ foreach ($space in $SpaceList) {
             }
         }
         catch {
-            $ExceptionMessage = $_.Exception.Message
-            if($IgnoreErrors -eq $True) {
-                Write-Warning "Skipping error in catalog process for project '$($project.Name)': $($ExceptionMessages)"
+            if ($IgnoreErrors -eq $True) {
+                Write-Warning "Skipping error in catalog process for project '$($project.Name)': $($_.Exception.Message)"
             } 
             else {
                 throw $_
