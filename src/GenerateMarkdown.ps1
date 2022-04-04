@@ -89,7 +89,7 @@ foreach ($source in $SourceGroups) {
             
             $counter++
         }
-        Write-Host "Setting markdown content for $Feature in $MarkdownFilePath"
+        Write-Host "Setting markdown content for $FeatureName in $MarkdownFilePath"
         Set-Content -Path $MarkdownFilePath -Value $MarkdownContent -Force
     }
 }
