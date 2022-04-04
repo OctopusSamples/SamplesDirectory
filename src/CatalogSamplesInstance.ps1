@@ -9,7 +9,8 @@ Takes the following input parameters:
     - OutputResults
     - ExcludedProjects which is a comma separated list of space/project names in the format:
       -> Space Infrastructure -> excludes any projects with that name on any space
-    -> [Space Name]|Space Infrastructure -> excludes any projects with that name on a specific space.
+      -> [Space Name]|Space Infrastructure -> excludes any projects with that name on a specific space.
+    - IgnoreErrors
 #>
 
 param (
@@ -20,7 +21,9 @@ param (
     [Parameter(Mandatory = $false)]
     [bool]$OutputResults = $False,
     [Parameter(Mandatory = $false)]
-    [string]$ExcludeProjects = $null
+    [string]$ExcludeProjects = $null,
+    [Parameter(Mandatory = $false)]
+    [bool]$IgnoreErrors = $False
 )
 
 # Include helpers
@@ -81,44 +84,54 @@ foreach ($space in $SpaceList) {
     $octopusData = Get-OctopusData -octopusUrl $OctopusUrl -octopusApiKey $OctopusApiKey -space $Space
     $projects = $octopusData.ProjectList
     foreach ($project in $projects) {
+        try {
+            # First, check if project is one to be excluded:
+            $matchingProject = Get-FirstOrDefault -items $ExcludedProjects -delegate ({ $args[0].Project -ieq $project.Name -and ($args[0].Space -ieq $space.Name -or [string]::IsNullOrWhiteSpace($args[0].Space)) })
+            if ($null -eq $matchingProject) {
+                Write-OctopusSuccess "Checking project '$($project.Name)' for features"
         
-        # First, check if project is one to be excluded:
-        $matchingProject = Get-FirstOrDefault -items $ExcludedProjects -delegate ({ $args[0].Project -ieq $project.Name -and ($args[0].Space -ieq $space.Name -or [string]::IsNullOrWhiteSpace($args[0].Space)) })
-        if ($null -eq $matchingProject) {
-            Write-OctopusSuccess "Checking project '$($project.Name)' for features"
-    
-            # Check each project deployment process.
-            $deploymentProcess = Get-OctopusProjectDeploymentProcess -project $project -octopusData $octopusData
-            $source = Get-SourceForDeploymentProcess -project $project -deploymentProcess $deploymentProcess
-            foreach ($deploymentstep in $deploymentProcess.Steps) {
-                $items = @(Find-AwsFeatureInStep -items $items -source $source -step $deploymentstep -octopusData $octopusData -project $project)
-                $items = @(Find-AzureFeatureInStep -items $items -source $source -step $deploymentstep -octopusData $octopusData -project $project)
-                $items = @(Find-GoogleCloudFeatureInStep -items $items -source $source -step $deploymentstep -octopusData $octopusData -project $project)
-                $items = @(Find-IISFeatureInStep -items $items -source $source -step $deploymentstep -octopusData $octopusData -project $project)
-                $items = @(Find-JavaFeatureInStep -items $items -source $source -step $deploymentstep -octopusData $octopusData -project $project)
-                $items = @(Find-KubernetesFeatureInStep -items $items -source $source -step $deploymentstep -octopusData $octopusData -project $project)
-                $items = @(Find-TerraformFeatureInStep -items $items -source $source -step $deploymentstep -octopusData $octopusData -project $project)
-            }
+                # Check each project deployment process.
+                $deploymentProcess = Get-OctopusProjectDeploymentProcess -project $project -octopusData $octopusData
+                $source = Get-SourceForDeploymentProcess -project $project -deploymentProcess $deploymentProcess
+                foreach ($deploymentstep in $deploymentProcess.Steps) {
+                    $items = @(Find-AwsFeatureInStep -items $items -source $source -step $deploymentstep -octopusData $octopusData -project $project)
+                    $items = @(Find-AzureFeatureInStep -items $items -source $source -step $deploymentstep -octopusData $octopusData -project $project)
+                    $items = @(Find-GoogleCloudFeatureInStep -items $items -source $source -step $deploymentstep -octopusData $octopusData -project $project)
+                    $items = @(Find-IISFeatureInStep -items $items -source $source -step $deploymentstep -octopusData $octopusData -project $project)
+                    $items = @(Find-JavaFeatureInStep -items $items -source $source -step $deploymentstep -octopusData $octopusData -project $project)
+                    $items = @(Find-KubernetesFeatureInStep -items $items -source $source -step $deploymentstep -octopusData $octopusData -project $project)
+                    $items = @(Find-TerraformFeatureInStep -items $items -source $source -step $deploymentstep -octopusData $octopusData -project $project)
+                }
 
-            # Check runbook processes
-            Write-Verbose "Getting runbooks for project '$($project.Name)'"
-            $projectRunbooks = Get-OctopusProjectRunbookList -project $project -octopusData $octopusData
-            foreach ($runbook in $projectRunbooks) {
-                $runbookProcess = Get-OctopusRunbookProcess -runbook $runbook -octopusData $octopusData
-                $source = Get-SourceForRunbookProcess -project $project -runbook $runbook -runbookProcess $runbookProcess
-                foreach ($runbookStep in $runbookProcess.Steps) {
-                    $items = @(Find-AwsFeatureInStep -items $items -source $source -step $runbookStep -octopusData $octopusData -project $project)
-                    $items = @(Find-AzureFeatureInStep -items $items -source $source -step $runbookStep -octopusData $octopusData -project $project)
-                    $items = @(Find-GoogleCloudFeatureInStep -items $items -source $source -step $runbookStep -octopusData $octopusData -project $project)
-                    $items = @(Find-IISFeatureInStep -items $items -source $source -step $runbookStep -octopusData $octopusData -project $project)
-                    $items = @(Find-JavaFeatureInStep -items $items -source $source -step $runbookStep -octopusData $octopusData -project $project)
-                    $items = @(Find-KubernetesFeatureInStep -items $items -source $source -step $runbookStep -octopusData $octopusData -project $project)
-                    $items = @(Find-TerraformFeatureInStep -items $items -source $source -step $runbookStep -octopusData $octopusData -project $project)
+                # Check runbook processes
+                Write-Verbose "Getting runbooks for project '$($project.Name)'"
+                $projectRunbooks = Get-OctopusProjectRunbookList -project $project -octopusData $octopusData
+                foreach ($runbook in $projectRunbooks) {
+                    $runbookProcess = Get-OctopusRunbookProcess -runbook $runbook -octopusData $octopusData
+                    $source = Get-SourceForRunbookProcess -project $project -runbook $runbook -runbookProcess $runbookProcess
+                    foreach ($runbookStep in $runbookProcess.Steps) {
+                        $items = @(Find-AwsFeatureInStep -items $items -source $source -step $runbookStep -octopusData $octopusData -project $project)
+                        $items = @(Find-AzureFeatureInStep -items $items -source $source -step $runbookStep -octopusData $octopusData -project $project)
+                        $items = @(Find-GoogleCloudFeatureInStep -items $items -source $source -step $runbookStep -octopusData $octopusData -project $project)
+                        $items = @(Find-IISFeatureInStep -items $items -source $source -step $runbookStep -octopusData $octopusData -project $project)
+                        $items = @(Find-JavaFeatureInStep -items $items -source $source -step $runbookStep -octopusData $octopusData -project $project)
+                        $items = @(Find-KubernetesFeatureInStep -items $items -source $source -step $runbookStep -octopusData $octopusData -project $project)
+                        $items = @(Find-TerraformFeatureInStep -items $items -source $source -step $runbookStep -octopusData $octopusData -project $project)
+                    }
                 }
             }
+            else {
+                Write-Host "Skipping project '$($project.Name)' as it matches a project exclusion entry."
+            }
         }
-        else {
-            Write-Host "Skipping project '$($project.Name)' as it matches a project exclusion entry."
+        catch {
+            $ExceptionMessage = $_.Exception.Message
+            if($IgnoreErrors -eq $True) {
+                Write-Warning "Skipping error in catalog process for project '$($project.Name)': $($ExceptionMessages)"
+            } 
+            else {
+                throw $_
+            }
         }
     } 
 }
