@@ -7,9 +7,12 @@ Takes the following input parameters:
     - OctopusURL
     - OctopusAPIKey
     - OutputResults
-    - ExcludedProjects which is a comma separated list of space/project names in the format:
+    - ExcludeProjects which is a comma separated list of space/project names in the format:
       -> Space Infrastructure -> excludes any projects with that name on any space
       -> [Space Name]|Space Infrastructure -> excludes any projects with that name on a specific space.
+    - ExcludeRunbooks which is a comma separated list of project/runbook names in the format:
+      -> Tomcat8-Debug-Certificate -> excludes any runbooks with that specific name in any project
+      -> [Project Name]|Tomcat8-Debug-Certificate -> excludes any runbooks with the name in a specific project
     - IgnoreErrors
 #>
 
@@ -20,6 +23,8 @@ param (
     [string]$OctopusApiKey = "API-YOURKEY",
     [Parameter(Mandatory = $false)]
     [bool]$OutputResults = $False,
+    [Parameter(Mandatory = $false)]
+    [string]$ExcludeRunbooks = $null,
     [Parameter(Mandatory = $false)]
     [string]$ExcludeProjects = $null,
     [Parameter(Mandatory = $false)]
@@ -76,6 +81,34 @@ if ($ExcludedProjects.Count -gt 0) {
     Write-Host "Projects Exclusion criteria: $($ExcludedProjects.Count)"
 }
 
+[PsCustomObject[]]$ExcludedRunbooks = @()
+Write-Host "Ignore Errors: $IgnoreErrors"
+Write-Host "Establishing any runbooks to exclude."
+if (![string]::IsNullOrWhitespace($ExcludeRunbooks)) {
+    @(($ExcludeRunbooks -Split ",").Trim()) | ForEach-Object {
+        Write-Verbose "Working on: '$_'"
+        $exclusionDefinition = ($_ -Split "\|")
+        $runbook = $exclusionDefinition[0].Trim()
+        $project = $null
+        if ($exclusionDefinition.Count -gt 1) {
+            $project = $exclusionDefinition[0].Trim()
+            $runbook = $exclusionDefinition[1].Trim()
+        }
+        if ([string]::IsNullOrWhiteSpace($runbook)) {
+            throw "Unable to establish runbook name from: '$($_)'"
+        }
+        $excludedRunbook = [PsCustomObject]@{
+            Project = $project
+            Runbook = $runbook
+        }
+        $ExcludedRunbooks += $excludedRunbook
+    }
+}
+
+if ($ExcludedRunbooks.Count -gt 0) {
+    Write-Host "Runbooks exclusion criteria: $($ExcludedRunbooks.Count)"
+}
+
 $SpaceList = Get-OctopusSpaceList -octopusUrl $OctopusUrl -octopusApiKey $OctopusApiKey
 
 foreach ($space in $SpaceList) {
@@ -88,35 +121,46 @@ foreach ($space in $SpaceList) {
             # First, check if project is one to be excluded:
             $matchingProject = Get-FirstOrDefault -items $ExcludedProjects -delegate ({ $args[0].Project -ieq $project.Name -and ($args[0].Space -ieq $space.Name -or [string]::IsNullOrWhiteSpace($args[0].Space)) })
             if ($null -eq $matchingProject) {
-                Write-OctopusSuccess "Checking project '$($project.Name)' for features"
-        
-                # Check each project deployment process.
-                $deploymentProcess = Get-OctopusProjectDeploymentProcess -project $project -octopusData $octopusData
-                $source = Get-SourceForDeploymentProcess -project $project -deploymentProcess $deploymentProcess
-                foreach ($deploymentstep in $deploymentProcess.Steps) {
-                    $items = @(Find-AwsFeatureInStep -items $items -source $source -step $deploymentstep -octopusData $octopusData -project $project)
-                    $items = @(Find-AzureFeatureInStep -items $items -source $source -step $deploymentstep -octopusData $octopusData -project $project)
-                    $items = @(Find-GoogleCloudFeatureInStep -items $items -source $source -step $deploymentstep -octopusData $octopusData -project $project)
-                    $items = @(Find-IISFeatureInStep -items $items -source $source -step $deploymentstep -octopusData $octopusData -project $project)
-                    $items = @(Find-JavaFeatureInStep -items $items -source $source -step $deploymentstep -octopusData $octopusData -project $project)
-                    $items = @(Find-KubernetesFeatureInStep -items $items -source $source -step $deploymentstep -octopusData $octopusData -project $project)
-                    $items = @(Find-TerraformFeatureInStep -items $items -source $source -step $deploymentstep -octopusData $octopusData -project $project)
+                if ($project.IsDisabled -eq $True) {
+                    Write-Host "Skipping project '$($project.Name)' as it's disabled"
                 }
+                else {
+                    Write-OctopusSuccess "Checking project '$($project.Name)' for features"
+            
+                    # Check each project deployment process.
+                    $deploymentProcess = Get-OctopusProjectDeploymentProcess -project $project -octopusData $octopusData
+                    $source = Get-SourceForDeploymentProcess -project $project -deploymentProcess $deploymentProcess
+                    foreach ($deploymentstep in $deploymentProcess.Steps) {
+                        $items = @(Find-AwsFeatureInStep -items $items -source $source -step $deploymentstep -octopusData $octopusData -project $project)
+                        $items = @(Find-AzureFeatureInStep -items $items -source $source -step $deploymentstep -octopusData $octopusData -project $project)
+                        $items = @(Find-GoogleCloudFeatureInStep -items $items -source $source -step $deploymentstep -octopusData $octopusData -project $project)
+                        $items = @(Find-IISFeatureInStep -items $items -source $source -step $deploymentstep -octopusData $octopusData -project $project)
+                        $items = @(Find-JavaFeatureInStep -items $items -source $source -step $deploymentstep -octopusData $octopusData -project $project)
+                        $items = @(Find-KubernetesFeatureInStep -items $items -source $source -step $deploymentstep -octopusData $octopusData -project $project)
+                        $items = @(Find-TerraformFeatureInStep -items $items -source $source -step $deploymentstep -octopusData $octopusData -project $project)
+                    }
 
-                # Check runbook processes
-                Write-Verbose "Getting runbooks for project '$($project.Name)'"
-                $projectRunbooks = Get-OctopusProjectRunbookList -project $project -octopusData $octopusData
-                foreach ($runbook in $projectRunbooks) {
-                    $runbookProcess = Get-OctopusRunbookProcess -runbook $runbook -octopusData $octopusData
-                    $source = Get-SourceForRunbookProcess -project $project -runbook $runbook -runbookProcess $runbookProcess
-                    foreach ($runbookStep in $runbookProcess.Steps) {
-                        $items = @(Find-AwsFeatureInStep -items $items -source $source -step $runbookStep -octopusData $octopusData -project $project)
-                        $items = @(Find-AzureFeatureInStep -items $items -source $source -step $runbookStep -octopusData $octopusData -project $project)
-                        $items = @(Find-GoogleCloudFeatureInStep -items $items -source $source -step $runbookStep -octopusData $octopusData -project $project)
-                        $items = @(Find-IISFeatureInStep -items $items -source $source -step $runbookStep -octopusData $octopusData -project $project)
-                        $items = @(Find-JavaFeatureInStep -items $items -source $source -step $runbookStep -octopusData $octopusData -project $project)
-                        $items = @(Find-KubernetesFeatureInStep -items $items -source $source -step $runbookStep -octopusData $octopusData -project $project)
-                        $items = @(Find-TerraformFeatureInStep -items $items -source $source -step $runbookStep -octopusData $octopusData -project $project)
+                    # Check runbook processes
+                    Write-Verbose "Getting runbooks for project '$($project.Name)'"
+                    $projectRunbooks = Get-OctopusProjectRunbookList -project $project -octopusData $octopusData
+                    foreach ($runbook in $projectRunbooks) {
+                        $matchingRunbook = Get-FirstOrDefault -items $ExcludedRunbooks -delegate ({ $args[0].Runbook -ieq $runbook.Name -and ($args[0].Project -ieq $project.Name -or [string]::IsNullOrWhiteSpace($args[0].Project)) })
+                        if ($null -eq $matchingRunbook) {
+                            $runbookProcess = Get-OctopusRunbookProcess -runbook $runbook -octopusData $octopusData
+                            $source = Get-SourceForRunbookProcess -project $project -runbook $runbook -runbookProcess $runbookProcess
+                            foreach ($runbookStep in $runbookProcess.Steps) {
+                                $items = @(Find-AwsFeatureInStep -items $items -source $source -step $runbookStep -octopusData $octopusData -project $project)
+                                $items = @(Find-AzureFeatureInStep -items $items -source $source -step $runbookStep -octopusData $octopusData -project $project)
+                                $items = @(Find-GoogleCloudFeatureInStep -items $items -source $source -step $runbookStep -octopusData $octopusData -project $project)
+                                $items = @(Find-IISFeatureInStep -items $items -source $source -step $runbookStep -octopusData $octopusData -project $project)
+                                $items = @(Find-JavaFeatureInStep -items $items -source $source -step $runbookStep -octopusData $octopusData -project $project)
+                                $items = @(Find-KubernetesFeatureInStep -items $items -source $source -step $runbookStep -octopusData $octopusData -project $project)
+                                $items = @(Find-TerraformFeatureInStep -items $items -source $source -step $runbookStep -octopusData $octopusData -project $project)
+                            }
+                        }
+                        else {
+                            Write-Host "Skipping runbook '$($runbook.Name)' as it matches a runbook exclusion entry."
+                        }
                     }
                 }
             }
